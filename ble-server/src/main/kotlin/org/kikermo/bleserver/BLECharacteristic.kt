@@ -2,11 +2,11 @@ package org.kikermo.bleserver.org.kikermo.bleserver
 
 import java.util.UUID
 
-class BLUCharacteristic(
+class BLECharacteristic(
     val uuid: UUID,
-    val readAccess: AccessType.Read?,
-    val writeAccess: AccessType.Write?,
-    val notifyAccess: AccessType.Notify,
+    val readAccess: AccessType.Read? = null,
+    val writeAccess: AccessType.Write? = null,
+    val notifyAccess: AccessType.Notify? = null,
 ) {
 
     var onValueChanged: ((ByteArray) -> Unit)? = null
