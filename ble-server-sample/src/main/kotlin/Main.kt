@@ -1,10 +1,6 @@
 package org.kikermo.bleserver
 
-import org.kikermo.bleserver.org.kikermo.bleserver.BLEAdvertisement
-import org.kikermo.bleserver.org.kikermo.bleserver.BLECharacteristic
-import org.kikermo.bleserver.org.kikermo.bleserver.BLEServer
-import org.kikermo.bleserver.org.kikermo.bleserver.BLEService
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random
 
 private const val UUID_READ_CHARACTERISTIC = "826c171b-e9d9-423c-a241-665bb0b46bfa"
@@ -30,12 +26,21 @@ fun main() {
         characteristics = listOf(writeCharacteristics, readCharacteristics)
     )
     val advertisement = BLEAdvertisement()
+    val connectionListener = object : BLEConnectionListener {
+        override fun onDeviceConnected(deviceName: String, deviceAddress: String) {
+            println("device connected")
+        }
+
+        override fun onDeviceDisconnected(deviceName: String, deviceAddress: String) {
+            println("device disconnected")
+        }
+
+    }
     val server = BLEServer(
         services = listOf(service),
-        advertisement = advertisement
-    ) {
-        println("Connection change")
-    }
+        advertisement = advertisement,
+        connectionListener = connectionListener
+    )
 
     server.start()
 

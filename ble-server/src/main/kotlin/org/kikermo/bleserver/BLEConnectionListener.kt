@@ -1,4 +1,4 @@
-package org.kikermo.bleserver.org.kikermo.bleserver
+package org.kikermo.bleserver
 
 interface BLEConnectionListener {
     fun onDeviceConnected(
