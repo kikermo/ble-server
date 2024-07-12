@@ -25,7 +25,6 @@ fun main() {
         uuid = UUID.fromString(UUID_SERVICE),
         characteristics = listOf(writeCharacteristics, readCharacteristics)
     )
-    val advertisement = BLEAdvertisement()
     val connectionListener = object : BLEConnectionListener {
         override fun onDeviceConnected(deviceName: String, deviceAddress: String) {
             println("device connected")
@@ -38,7 +37,6 @@ fun main() {
     }
     val server = BLEServer(
         services = listOf(service),
-        advertisement = advertisement,
         connectionListener = connectionListener
     )
 

@@ -10,6 +10,10 @@ repositories {
 }
 
 dependencies {
+    implementation(platform(libs.dbus.bom))
+    implementation(libs.dbus.core)
+    implementation(libs.dbus.transport.jnrunixsockets)
+
     testImplementation(kotlin("test"))
 }
 
