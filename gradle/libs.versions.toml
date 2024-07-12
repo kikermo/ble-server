@@ -1,5 +1,6 @@
 [versions]
 dbus = "5.0.0"
+log4j = "2.17.2"
 
 [libraries]
 dbus-bom = { module = "com.github.hypfvieh:dbus-java-bom", version.ref = "dbus" }
@@ -8,3 +9,6 @@ dbus-transport-jnrunixsockets = { module = "com.github.hypfvieh:dbus-java-transp
 dbus-transport-junixsockets = { module = "com.github.hypfvieh:dbus-java-transport-junixsocket" }  # Alternative junixsockets
 dbus-transport-nativeunixsockets = { module = "com.github.hypfvieh:dbus-java-transport-native-unixsocket" }  # Native unixsockets
 dbus-transport-tcp = { module = "com.github.hypfvieh:dbus-java-transport-tcp" }  # TCP
+
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4j-impl = { module = "org.apache.logging.log4j:log4j-slf4j-impl", version.ref = "log4j" }

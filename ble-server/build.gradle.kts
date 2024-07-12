@@ -14,6 +14,9 @@ dependencies {
     implementation(libs.dbus.core)
     implementation(libs.dbus.transport.jnrunixsockets)
 
+    implementation(libs.log4j.api)
+    implementation(libs.log4j.impl)
+
     testImplementation(kotlin("test"))
 }
 
@@ -21,5 +24,5 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
