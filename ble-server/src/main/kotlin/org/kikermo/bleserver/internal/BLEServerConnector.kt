@@ -1,12 +1,13 @@
 package org.kikermo.bleserver.internal
 
+import org.bluez.GattManager1
+import org.bluez.LEAdvertisingManager1
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.interfaces.ObjectManager
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.dbus.types.Variant
 import org.kikermo.bleserver.BLEService
-import java.nio.file.Path
 
 internal class BLEServerConnector {
     companion object {
@@ -41,12 +42,21 @@ internal class BLEServerConnector {
             adapterProperties.Set(BLUEZ_ADAPTER_INTERFACE, "Alias", Variant(adapterAlias))
         }
 
-        val gattManager: DBusInterface = dbusConnector.getRemoteObject(BLUEZ_DBUS_BUS_NAME, adapterPath)
-        val advManager: DBusInterface = dbusConnector.getRemoteObject(BLUEZ_DBUS_BUS_NAME, adapterPath)
+        val gattManager: DBusInterface = dbusConnector.getRemoteObject(
+            BLUEZ_DBUS_BUS_NAME,
+            adapterPath,
+            GattManager1::class.java
+        ) //as GattManager1
+        val advManager: LEAdvertisingManager1 = dbusConnector.getRemoteObject(
+            BLUEZ_DBUS_BUS_NAME,
+            adapterPath,
+            LEAdvertisingManager1::class.java
+        ) as LEAdvertisingManager1
 
         registerAdvertisement(
             bleServices = bleServices,
-            serverName = serverName
+            serverName = serverName,
+            advertisementManager = advManager
         )
     }
 
@@ -56,18 +66,24 @@ internal class BLEServerConnector {
         unRegisterAdvertisement(path)
     }
 
-    private fun registerAdvertisement(bleServices: List<BLEService>, serverName: String) {
+    private fun registerAdvertisement(
+        bleServices: List<BLEService>,
+        serverName: String,
+        advertisementManager: LEAdvertisingManager1
+    ) {
         val path = PATH_DBUS_ROOT + serverName
+        val advertisementProperties = getDBusProperties(
+            bleServices = bleServices,
+            serverName = serverName,
+        )
         dbusConnector.exportObject(
             path,
-            getDBusProperties(
-                bleServices = bleServices,
-                serverName = serverName,
-            )
+            advertisementManager
         )
+        advertisementManager.RegisterAdvertisement(advertisementProperties, mutableMapOf())
     }
 
-    private fun unRegisterAdvertisement(path: String){
+    private fun unRegisterAdvertisement(path: String) {
         dbusConnector.unExportObject(path)
     }
 
@@ -93,7 +109,7 @@ internal class BLEServerConnector {
             }
 
             override fun <A : Any?> Get(interfaceName: String, propertyName: String): A {
-                return properties[interfaceName]?.get(propertyName) as? A?
+                return (properties[interfaceName]?.get(propertyName) as? A)
                     ?: throw RuntimeException("Incompatible types")
             }
 
@@ -112,7 +128,19 @@ internal class BLEServerConnector {
 
     private fun findAdapterPath(): String {
         val bluezObjectManager =
-            dbusConnector.getRemoteObject(BLUEZ_DBUS_BUS_NAME, PATH_DBUS_ROOT) as (ObjectManager)
+            dbusConnector.getRemoteObject(
+                BLUEZ_DBUS_BUS_NAME,
+                PATH_DBUS_ROOT,
+                ObjectManager::class.java
+            ) as ObjectManager
+
+        bluezObjectManager.GetManagedObjects().entries.forEach {
+            println("${it.key} -----")
+            it.value.entries.forEach {
+                println("     ---- ${it.key}")
+            }
+            println("--------")
+        }
 
         return bluezObjectManager.GetManagedObjects().entries.find { entry ->
             entry.value.containsKey(BLUEZ_LE_ADV_INTERFACE)
