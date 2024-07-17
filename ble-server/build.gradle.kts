@@ -13,6 +13,8 @@ dependencies {
     implementation(platform(libs.dbus.bom))
     implementation(libs.dbus.core)
     implementation(libs.dbus.transport.jnrunixsockets)
+//    implementation(libs.dbus.transport.junixsocket)
+//    implementation(libs.dbus.transport.nativeunixsockets)
 
     implementation(project(":bluez-core"))
 

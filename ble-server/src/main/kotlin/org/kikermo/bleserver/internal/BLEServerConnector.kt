@@ -1,6 +1,7 @@
 package org.kikermo.bleserver.internal
 
 import org.bluez.GattManager1
+import org.bluez.LEAdvertisement1
 import org.bluez.LEAdvertisingManager1
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
@@ -78,7 +79,7 @@ internal class BLEServerConnector {
         )
         dbusConnector.exportObject(
             path,
-            advertisementManager
+            advertisementProperties
         )
         advertisementManager.RegisterAdvertisement(advertisementProperties, mutableMapOf())
     }
@@ -87,10 +88,9 @@ internal class BLEServerConnector {
         dbusConnector.unExportObject(path)
     }
 
-    private fun getDBusProperties(bleServices: List<BLEService>, serverName: String): Properties {
-        return object : Properties {
-            val properties = buildMap<String, MutableMap<String, Variant<*>>> {
-
+    private fun getDBusProperties(bleServices: List<BLEService>, serverName: String): DBusInterface {
+        return object : Properties, LEAdvertisement1 {
+            val properties = buildMap {
                 val advertisementProperties = buildMap<String, Variant<*>> {
                     val serviceUUIDs = bleServices.map {
                         it.uuid.toString()
@@ -106,6 +106,10 @@ internal class BLEServerConnector {
 
             override fun getObjectPath(): String {
                 return serverName + PATH_ADVERTISEMENT_SUFFIX
+            }
+
+            override fun Release() {
+                println("Release LE Server")
             }
 
             override fun <A : Any?> Get(interfaceName: String, propertyName: String): A {
