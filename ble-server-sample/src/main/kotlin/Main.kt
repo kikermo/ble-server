@@ -6,7 +6,8 @@ import kotlin.random.Random
 private const val UUID_READ_CHARACTERISTIC = "826c171b-e9d9-423c-a241-665bb0b46bfa"
 private const val UUID_WRITE_CHARACTERISTIC = "9371ef59-c4ce-4bea-a33a-1946b2ef2963"
 private const val UUID_SERVICE = "215f404b-1413-4b38-90d6-72c183eea77a"
-private const val SERVER_NAME = "sampleble"
+private const val SERVER_NAME = "sample_ble"
+private const val SERVICE_NAME = "sample_service"
 
 fun main() {
     println("Hello BLE")
@@ -24,6 +25,7 @@ fun main() {
     )
     val service = BLEService(
         uuid = UUID.fromString(UUID_SERVICE),
+        name = SERVICE_NAME,
         characteristics = listOf(writeCharacteristics, readCharacteristics)
     )
     val connectionListener = object : BLEConnectionListener {

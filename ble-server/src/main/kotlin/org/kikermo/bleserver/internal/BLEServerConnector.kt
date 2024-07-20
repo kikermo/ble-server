@@ -1,13 +1,16 @@
 package org.kikermo.bleserver.internal
 
+import org.bluez.GattApplication1
 import org.bluez.GattManager1
 import org.bluez.LEAdvertisement1
 import org.bluez.LEAdvertisingManager1
+import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.DBusInterface
 import org.freedesktop.dbus.interfaces.ObjectManager
 import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.dbus.types.Variant
+import org.kikermo.bleserver.BLECharacteristic
 import org.kikermo.bleserver.BLEService
 
 internal class BLEServerConnector {
@@ -18,6 +21,7 @@ internal class BLEServerConnector {
         private const val BLUEZ_ADAPTER_INTERFACE = "org.bluez.Adapter1"
 
         private const val ADVERTISEMENT_TYPE_PERIPHERAL = "peripheral"
+        private const val ADVERTISEMENT_TYPE_PROPERTY_KEY = "Type"
         private const val ADVERTISEMENT_SERVICES_UUIDS_PROPERTY_KEY = "ServiceUUIDs"
         private const val ADVERTISEMENT_LOCAL_NAME_PROPERTY_KEY = "LocalName"
         private const val ADVERTISEMENT_INCLUDE_TX_POWER_PROPERTY_KEY = "IncludeTxPower"
@@ -25,9 +29,22 @@ internal class BLEServerConnector {
 
         private const val PATH_DBUS_ROOT = "/"
         private const val PATH_ADVERTISEMENT_SUFFIX = "/advertisement"
+        private const val PATH_SERVICE_SUFFIX = "/s"
+        private const val PATH_CHARACTERISTIC_SUFFIX = "/c"
 
         private const val LEADVERTISEMENT_INTERFACE = "org.bluez.LEAdvertisement1"
+        private const val GATT_CHARACTERISTIC_INTERFACE = "org.bluez.GattCharacteristic1"
+        private const val SERVICE_PRIMARY_PROPERTY_KEY = "Primary"
 
+        private const val CHARACTERISTIC_SERVICE_PROPERTY_KEY = "Service"
+        private const val CHARACTERISTIC_UUID_PROPERTY_KEY = "UUID"
+        private const val CHARACTERISTIC_FLAGS_PROPERTY_KEY = "Flags"
+        private const val CHARACTERISTIC_DESCRIPTORS_PROPERTY_KEY = "Descriptors"
+        private const val CHARACTERISTIC_VALUE_PROPERTY_KEY = "Value"
+
+        private const val CHARACTERISTIC_FLAG_READ = "read"
+        private const val CHARACTERISTIC_FLAG_WRITE = "write"
+        private const val CHARACTERISTIC_FLAG_NOTIFY = "notify"
     }
 
     private val dbusConnector = DBusConnectionBuilder.forSystemBus().build()
@@ -43,7 +60,7 @@ internal class BLEServerConnector {
             adapterProperties.Set(BLUEZ_ADAPTER_INTERFACE, "Alias", Variant(adapterAlias))
         }
 
-        val gattManager: DBusInterface = dbusConnector.getRemoteObject(
+        val gattManager: GattManager1 = dbusConnector.getRemoteObject(
             BLUEZ_DBUS_BUS_NAME,
             adapterPath,
             GattManager1::class.java
@@ -59,6 +76,37 @@ internal class BLEServerConnector {
             serverName = serverName,
             advertisementManager = advManager
         )
+
+        registerGattService(
+            bleServices = bleServices,
+            gattManager = gattManager
+        )
+    }
+
+    private fun registerGattService(
+        bleServices: List<BLEService>,
+        gattManager: GattManager1
+    ) {
+        val gattApplication = object : GattApplication1 {
+            override fun getObjectPath(): String {
+                return PATH_DBUS_ROOT
+            }
+
+            override fun GetManagedObjects(): Map<DBusPath, Map<String, Map<String, Variant<Any>>>> {
+                println("Application -> GetManagedObjects")
+
+                return bleServices.associate { service ->
+                    val serverPath = service.toPath()
+                    val characteristicProperties = service.characteristics.associate { characteristic ->
+                        characteristic.toPath(serverPath) to mapOf<String, Variant<Any>>()
+                    }
+                    serverPath to characteristicProperties
+                }
+            }
+
+        }
+
+        gattManager.RegisterApplication(gattApplication, mapOf())
     }
 
 
@@ -92,6 +140,8 @@ internal class BLEServerConnector {
         return object : Properties, LEAdvertisement1 {
             val properties = buildMap {
                 val advertisementProperties = buildMap<String, Variant<*>> {
+                    put(ADVERTISEMENT_TYPE_PROPERTY_KEY,Variant(ADVERTISEMENT_TYPE_PERIPHERAL))
+
                     val serviceUUIDs = bleServices.map {
                         it.uuid.toString()
                     }
@@ -151,5 +201,42 @@ internal class BLEServerConnector {
                     && entry.value.containsKey(BLUEZ_GATT_INTERFACE)
 
         }?.key?.path ?: throw RuntimeException("No BLE adapter found")
+    }
+
+    private fun BLEService.toPath(): DBusPath {
+        return DBusPath("$PATH_DBUS_ROOT$name$PATH_SERVICE_SUFFIX")
+    }
+
+    private fun BLECharacteristic.toPath(serverPath: DBusPath): String {
+        return "${serverPath.path}$PATH_CHARACTERISTIC_SUFFIX"
+    }
+
+    private fun BLECharacteristic.toProperties(
+        serverPath: String,
+    ): Map<String, Map<String, Variant<*>>> {
+        val characteristicProperties = buildMap {
+            put(CHARACTERISTIC_SERVICE_PROPERTY_KEY, Variant(serverPath))
+            put(CHARACTERISTIC_UUID_PROPERTY_KEY, Variant(uuid))
+            put(CHARACTERISTIC_FLAGS_PROPERTY_KEY, Variant(toFlags()))
+            put(CHARACTERISTIC_DESCRIPTORS_PROPERTY_KEY, Variant(arrayOf<DBusPath>()))
+        }
+
+        return mapOf(GATT_CHARACTERISTIC_INTERFACE to characteristicProperties)
+    }
+
+    private fun BLECharacteristic.toFlags(): Array<String> {
+        val flags: List<String> = buildList {
+            if (readAccess != null) {
+                add(CHARACTERISTIC_FLAG_READ)
+            }
+            if (writeAccess != null) {
+                add(CHARACTERISTIC_FLAG_WRITE)
+            }
+            if (notifyAccess != null) {
+                add(CHARACTERISTIC_FLAG_NOTIFY)
+            }
+        }
+
+        return flags.toTypedArray()
     }
 }
