@@ -4,6 +4,7 @@ import java.util.UUID
 
 class BLECharacteristic(
     val uuid: UUID,
+    val name: String,
     val readAccess: AccessType.Read? = null,
     val writeAccess: AccessType.Write? = null,
     val notifyAccess: AccessType.Notify? = null,

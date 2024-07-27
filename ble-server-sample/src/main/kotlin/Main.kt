@@ -1,13 +1,13 @@
 package org.kikermo.bleserver
 
-import java.util.UUID
+import java.util.*
 import kotlin.random.Random
 
 private const val UUID_READ_CHARACTERISTIC = "826c171b-e9d9-423c-a241-665bb0b46bfa"
 private const val UUID_WRITE_CHARACTERISTIC = "9371ef59-c4ce-4bea-a33a-1946b2ef2963"
 private const val UUID_SERVICE = "215f404b-1413-4b38-90d6-72c183eea77a"
-private const val SERVER_NAME = "sample_ble"
-private const val SERVICE_NAME = "sample_service"
+private const val SERVER_NAME = "sampleble"
+private const val SERVICE_NAME = "sampleservice"
 
 fun main() {
     println("Hello BLE")
@@ -15,13 +15,15 @@ fun main() {
     val readCharacteristics = BLECharacteristic(
         uuid = UUID.fromString(UUID_READ_CHARACTERISTIC),
         readAccess = BLECharacteristic.AccessType.Read,
+        name = "heartbeat"
     )
     val writeCharacteristics = BLECharacteristic(
         uuid = UUID.fromString(UUID_WRITE_CHARACTERISTIC),
         readAccess = BLECharacteristic.AccessType.Read,
         writeAccess = BLECharacteristic.AccessType.Write { value ->
             println("New value - $value")
-        }
+        },
+        name = "temperature"
     )
     val service = BLEService(
         uuid = UUID.fromString(UUID_SERVICE),
