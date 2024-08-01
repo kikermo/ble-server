@@ -37,7 +37,7 @@ internal fun BLECharacteristic.toProperties(
 
     val characteristicProperties = buildMap {
         put(CHARACTERISTIC_SERVICE_PROPERTY_KEY, Variant(serverPath))
-        put(CHARACTERISTIC_UUID_PROPERTY_KEY, Variant(uuid))
+        put(CHARACTERISTIC_UUID_PROPERTY_KEY, Variant(uuid.toString()))
         put(CHARACTERISTIC_FLAGS_PROPERTY_KEY, Variant(toFlags()))
         put(CHARACTERISTIC_DESCRIPTORS_PROPERTY_KEY, Variant(arrayOf<DBusPath>()))
     }
@@ -49,7 +49,7 @@ internal fun BLEService.toProperties(isPrimary: Boolean, serverName: String): Ma
     println("Service -> getServiceProperties")
 
     val serviceMap = buildMap {
-        put(SERVICE_UUID_PROPERTY_KEY, Variant(uuid))
+        put(SERVICE_UUID_PROPERTY_KEY, Variant(uuid.toString()))
         put(SERVICE_PRIMARY_PROPERTY_KEY, Variant(isPrimary))
         val characteristicPaths = characteristics.map { characteristic ->
             characteristic.toPath(toPath(serverName).path)

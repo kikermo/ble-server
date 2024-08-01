@@ -3,18 +3,21 @@ package org.kikermo.bleserver.internal
 import org.bluez.*
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
-import org.freedesktop.dbus.interfaces.DBusInterface
-import org.freedesktop.dbus.interfaces.ObjectManager
-import org.freedesktop.dbus.interfaces.Properties
+import org.freedesktop.dbus.interfaces.*
 import org.freedesktop.dbus.types.Variant
 import org.kikermo.bleserver.BLEService
 
 internal class BLEServerConnector {
     companion object {
+
+        private const val DBUS_BUSNAME = "org.freedesktop.DBus"
+
         private const val BLUEZ_DBUS_BUS_NAME = "org.bluez"
         private const val BLUEZ_GATT_INTERFACE = "org.bluez.GattManager1"
         private const val BLUEZ_LE_ADV_INTERFACE = "org.bluez.LEAdvertisingManager1"
         private const val BLUEZ_ADAPTER_INTERFACE = "org.bluez.Adapter1"
+        private const val BLUEZ_DEVICE_INTERFACE = "org.bluez.Device1"
+
 
         private const val PATH_DBUS_DIVIDER = "/"
         private const val PATH_ADVERTISEMENT_SUFFIX = "/advertisement"
@@ -23,6 +26,9 @@ internal class BLEServerConnector {
     }
 
     private val dbusConnector = DBusConnectionBuilder.forSystemBus().build()
+
+    private lateinit var interfacesAddedSignalHandler: DBusSigHandler<ObjectManager.InterfacesAdded>
+    private lateinit var interfacesRemovedSignalHandler: DBusSigHandler<ObjectManager.InterfacesRemoved>
 
     fun startServices(bleServices: List<BLEService>, adapterAlias: String? = null, serverName: String) {
         val adapterPath = findAdapterPath()
@@ -57,6 +63,8 @@ internal class BLEServerConnector {
             gattManager = gattManager,
             applicationName = serverName
         )
+
+        initInterfacesHandler()
     }
 
     private fun registerAdvertisement(
@@ -71,7 +79,7 @@ internal class BLEServerConnector {
         dbusConnector.exportObject(
             advertisementProperties
         )
-        advertisementManager.RegisterAdvertisement(advertisementProperties, mutableMapOf())
+        advertisementManager.RegisterAdvertisement(advertisementProperties, mapOf())
     }
 
     private fun registerGattService(
@@ -79,7 +87,28 @@ internal class BLEServerConnector {
         gattManager: GattManager1,
         applicationName: String,
     ) {
+        val managedObject = buildMap {
+            bleServices.forEachIndexed { index, bleService ->
+                val servicePath = bleService.toPath(applicationName)
+                put(
+                    key = servicePath,
+                    value = bleService.toProperties(isPrimary = index == 0, serverName = applicationName)
+                )  // TODO define primary service in API
+
+                bleService.characteristics.forEach { bleCharacteristic ->
+                    put(
+                        key = DBusPath(bleCharacteristic.toPath(servicePath.path)),
+                        value = bleCharacteristic.toProperties(servicePath.path)
+                    )
+                }
+            }
+        }
+
         val gattApplication = object : GattApplication1 {
+            override fun isRemote(): Boolean {
+                return false
+            }
+
             override fun getObjectPath(): String {
                 return "$PATH_DBUS_DIVIDER$applicationName"
             }
@@ -87,23 +116,7 @@ internal class BLEServerConnector {
             override fun GetManagedObjects(): Map<DBusPath, Map<String, Map<String, Variant<*>>>> {
                 println("Application -> GetManagedObjects")
 
-                return buildMap {
-                    bleServices.forEachIndexed { index, bleService ->
-                        val servicePath = bleService.toPath(applicationName)
-                        put(
-                            key = servicePath,
-                            value = bleService.toProperties(isPrimary = index == 0, serverName = applicationName)
-                        )  // TODO define primary service in API
-
-                        bleService.characteristics.forEach { bleCharacteristic ->
-                            put(
-                                key = DBusPath(bleCharacteristic.toPath(servicePath.path)),
-                                value = bleCharacteristic.toProperties(servicePath.path)
-                            )
-                        }
-                    }
-                }
-
+                return managedObject
             }
         }
         bleServices.forEach { bleService ->
@@ -131,19 +144,17 @@ internal class BLEServerConnector {
                     }
 
                     override fun ReadValue(option: MutableMap<String, Variant<Any>>?): ByteArray {
-                        TODO("Not yet implemented")
+                        return byteArrayOf()
                     }
 
                     override fun WriteValue(value: ByteArray?, option: MutableMap<String, Variant<Any>>?) {
-                        TODO("Not yet implemented")
                     }
 
                     override fun StartNotify() {
-                        TODO("Not yet implemented")
+
                     }
 
                     override fun StopNotify() {
-                        TODO("Not yet implemented")
                     }
 
                 }
@@ -152,12 +163,19 @@ internal class BLEServerConnector {
             dbusConnector.exportObject(gattService)
         }
 
-        dbusConnector.exportObject(
-            gattApplication.objectPath,
-            gattApplication
-        )
+        dbusConnector.exportObject(gattApplication)
 
-        gattManager.RegisterApplication(gattApplication, mapOf())
+        gattApplication.javaClass.methods.forEach {
+            println(it.name)
+            println(it.toString())
+        }
+
+        gattManager.javaClass.methods.forEach {
+            println(it.name)
+            println(it.toString())
+        }
+
+        gattManager.RegisterApplication(gattApplication, mutableMapOf())
     }
 
     private fun gattService1(bleService: BLEService, applicationName: String) = object : GattService1, Properties {
@@ -243,5 +261,55 @@ internal class BLEServerConnector {
                     && entry.value.containsKey(BLUEZ_GATT_INTERFACE)
 
         }?.key?.path ?: throw RuntimeException("No BLE adapter found")
+    }
+
+    private fun initInterfacesHandler() {
+        val dbus: DBus = dbusConnector.getRemoteObject(
+            DBUS_BUSNAME, "/or/freedesktop/DBus",
+            DBus::class.java
+        )
+        val bluezDbusBusName: String = dbus.GetNameOwner(BLUEZ_DBUS_BUS_NAME)
+        val bluezObjectManager = dbusConnector.getRemoteObject(
+            BLUEZ_DBUS_BUS_NAME, "/",
+            ObjectManager::class.java
+        )
+
+        interfacesAddedSignalHandler =
+            DBusSigHandler<ObjectManager.InterfacesAdded> { signal ->
+                val iamap: Map<String, Variant<*>>? = signal.interfaces.get(BLUEZ_DEVICE_INTERFACE)
+                if (iamap != null) {
+                    val address: Variant<String> = iamap["Address"] as Variant<String>
+                    println("Device address: " + address.value)
+                    println("Device added path: " + signal.getObjectPath().toString())
+//                    hasDeviceConnected = true
+//                    if (listener != null) {
+//                        listener.deviceConnected()
+//                    }
+                }
+            }
+
+        interfacesRemovedSignalHandler =
+            DBusSigHandler<ObjectManager.InterfacesRemoved> { signal ->
+                signal.interfaces.filter { it == BLUEZ_DEVICE_INTERFACE }.forEach { ir ->
+                    println("Device Removed path: " + signal.getObjectPath().toString())
+//                    hasDeviceConnected = false
+//                    if (listener != null) {
+//                        listener.deviceDisconnected()
+//                    }
+                }
+            }
+
+        dbusConnector.addSigHandler(
+            ObjectManager.InterfacesAdded::class.java,
+            bluezDbusBusName,
+            bluezObjectManager,
+            interfacesAddedSignalHandler
+        )
+        dbusConnector.addSigHandler(
+            ObjectManager.InterfacesRemoved::class.java,
+            bluezDbusBusName,
+            bluezObjectManager,
+            interfacesRemovedSignalHandler
+        )
     }
 }
