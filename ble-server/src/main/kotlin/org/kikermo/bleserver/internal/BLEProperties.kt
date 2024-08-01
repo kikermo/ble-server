@@ -31,12 +31,12 @@ private const val ADVERTISEMENT_LOCAL_NAME_PROPERTY_KEY = "LocalName"
 private const val ADVERTISEMENT_INCLUDE_TX_POWER_PROPERTY_KEY = "IncludeTxPower"
 
 internal fun BLECharacteristic.toProperties(
-    serverPath: String,
+    servicePath: String,
 ): Map<String, Map<String, Variant<*>>> {
     println("Characteristic -> getCharacteristicProperties")
 
     val characteristicProperties = buildMap {
-        put(CHARACTERISTIC_SERVICE_PROPERTY_KEY, Variant(serverPath))
+        put(CHARACTERISTIC_SERVICE_PROPERTY_KEY, Variant(DBusPath(servicePath)))
         put(CHARACTERISTIC_UUID_PROPERTY_KEY, Variant(uuid.toString()))
         put(CHARACTERISTIC_FLAGS_PROPERTY_KEY, Variant(toFlags()))
         put(CHARACTERISTIC_DESCRIPTORS_PROPERTY_KEY, Variant(arrayOf<DBusPath>()))

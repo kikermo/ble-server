@@ -178,25 +178,31 @@ internal class BLEServerConnector {
         gattManager.RegisterApplication(gattApplication, mutableMapOf())
     }
 
-    private fun gattService1(bleService: BLEService, applicationName: String) = object : GattService1, Properties {
-        override fun getObjectPath(): String {
-            return bleService.toPath(applicationName).path
-        }
+    private fun gattService1(bleService: BLEService, applicationName: String): GattService1 {
+        val servicePath = bleService.toPath(applicationName).path
+        val serviceProperties = bleService.toProperties(true, applicationName)
 
-        override fun <A : Any?> Get(p0: String?, p1: String?): A {
-            TODO("Not yet implemented")
-        }
-
-        override fun <A : Any?> Set(p0: String?, p1: String?, p2: A) {
-            TODO("Not yet implemented")
-        }
-
-        override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
-            if (GATT_SERVICE_INTERFACE == interfaceName) {
-                return bleService.toProperties(true, applicationName)[GATT_SERVICE_INTERFACE]
-                    ?: throw RuntimeException("No $GATT_SERVICE_INTERFACE found on service")
+        return object : GattService1, Properties {
+            override fun getObjectPath(): String {
+                return servicePath
             }
-            throw RuntimeException("Interface $interfaceName doesn't match $GATT_SERVICE_INTERFACE")
+
+            override fun <A : Any?> Get(p0: String?, p1: String?): A {
+                println("Implemented")
+                TODO("Not yet implemented")
+            }
+
+            override fun <A : Any?> Set(p0: String?, p1: String?, p2: A) {
+                TODO("Not yet implemented")
+            }
+
+            override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
+                if (GATT_SERVICE_INTERFACE == interfaceName) {
+                    return serviceProperties[GATT_SERVICE_INTERFACE]
+                        ?: throw RuntimeException("No $GATT_SERVICE_INTERFACE found on service")
+                }
+                throw RuntimeException("Interface $interfaceName doesn't match $GATT_SERVICE_INTERFACE")
+            }
         }
     }
 
