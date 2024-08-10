@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    `maven-publish`
 }
 
 group = "org.kikermo.bleserver"
@@ -30,4 +31,16 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(17)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "org.kikermo.bleserver"
+            artifactId = "core"
+            version = libs.versions.bleserver.get()
+
+            from(components["java"])
+        }
+    }
 }
