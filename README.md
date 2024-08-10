@@ -63,10 +63,10 @@ At this stage, contributions can be made in any of the following ways:
 
 As mentioned before, the project is in an early stage, but these are the features I would like to implement in the following months.
 
-- Local maven publishing. August 2024.
-- Quality checks Q3 2024
-- DSL creation. Q3 2024
-- Beta version on Manven Centra. Q4 2024
-- KMP support Q1,Q2 2025
+- [x] Local maven publishing. August 2024.
+- [ ] Quality checks Q3 2024
+- [ ] DSL creation. Q3 2024
+- [ ] Beta version on Manven Centra. Q4 2024
+- [ ] KMP support Q1,Q2 2025
 
 
