@@ -5,6 +5,7 @@ log4j = "2.17.2"
 
 [libraries]
 bleserver-core = { module = "org.kikermo.bleserver:core", version.ref = "bleserver"}
+bleserver-bluez = { module = "org.kikermo.bleserver:bluez", version.ref = "bleserver"}
 
 dbus-bom = { module = "com.github.hypfvieh:dbus-java-bom", version.ref = "dbus" }
 dbus-core = { module = "com.github.hypfvieh:dbus-java-core" }

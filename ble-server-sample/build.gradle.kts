@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
     implementation(libs.bleserver.core)
-    implementation(project(":bluez-core"))
+    implementation(libs.bleserver.bluez)
 }
 
 kotlin {

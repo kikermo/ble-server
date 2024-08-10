@@ -9,8 +9,7 @@ class BLECharacteristic(
     val writeAccess: AccessType.Write? = null,
     val notifyAccess: AccessType.Notify? = null,
 ) {
-
-    internal var onValueChanged: ((ByteArray) -> Unit)? = null
+    var onValueChanged: ((ByteArray) -> Unit)? = null
     var value: ByteArray = byteArrayOf()
         set(value) {
             onValueChanged?.let { it(value) }
