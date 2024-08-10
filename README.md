@@ -1,3 +1,5 @@
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # ble-server
 BLE server-side library for the BLUEZ stack built in Kotlin. Initial implementation based on  [ble-java](https://github.com/tongo/ble-java).
 
@@ -29,3 +31,5 @@ As mentioned before, the project is in an early stage, but these are the feature
 - DSL creation. Q3 2024
 - Beta version on Manven Centra. Q4 2024
 - KMP support Q1,Q2 2025
+
+
