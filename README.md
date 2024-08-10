@@ -1,8 +1,35 @@
-# ble-server
-BLE server-side library for the BLUEZ stack made in Kotlin. Initial implementation based on  [ble-java](https://github.com/tongo/ble-java).
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Currently WIP.
+# ble-server
+BLE server-side library for the BLUEZ stack built in Kotlin. Initial implementation based on  [ble-java](https://github.com/tongo/ble-java).
+
+This project is currently in a very early stage. I built it as a proof of concept, although I have plans to extend its compatibility and improve the API and quality. It has been tested on Raspberry Pi 3 and 5, but there shouldn't be a problem running it on any other Linux system with the BLUEZ stack.
 
 ### Get Started
 
-### Kotlin DSL
+To use BLE-Server, check out the project from GitHub. To run the sample code you need to run
+```
+./gradlew :ble-server-sample:run
+```
+
+### Contribution
+
+At this stage, contributions can be made in any of the following ways:
+
+- Feedback. You can send me your feedback to `kikerno@gmail.com`
+- Create an issue on the project with anything you think is not working properly or a feature you would like to see. Issues are a good way to help a project grow and improve.
+- Create a Pull Request. If something can easily improved, or cleaned up, feel free to do so. For features, it would be better to discuss an issue before creating a PR.
+- Giving a star to the project. That would give visibility and attract other developers to contribute.
+- Share on Slack channels or other online forums.
+
+### Roadmap
+
+As mentioned before, the project is in an early stage, but these are the features I would like to implement in the following months.
+
+- Local maven publishing. August 2024.
+- Quality checks Q3 2024
+- DSL creation. Q3 2024
+- Beta version on Manven Centra. Q4 2024
+- KMP support Q1,Q2 2025
+
+
