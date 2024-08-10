@@ -4,4 +4,4 @@ plugins {
 rootProject.name = "BLE-Server"
 include("ble-server")
 include("ble-server-sample")
-include("bluez-core")
+include("ble-server-bluez")

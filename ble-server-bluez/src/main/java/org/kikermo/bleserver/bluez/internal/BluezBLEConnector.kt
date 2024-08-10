@@ -1,4 +1,4 @@
-package org.kikermo.bleserver.internal
+package org.kikermo.bleserver.bluez.internal
 
 import org.bluez.*
 import org.freedesktop.dbus.DBusPath
@@ -8,8 +8,12 @@ import org.freedesktop.dbus.interfaces.Properties.PropertiesChanged
 import org.freedesktop.dbus.types.Variant
 import org.kikermo.bleserver.BLEConnectionListener
 import org.kikermo.bleserver.BLEService
+import org.kikermo.bleserver.internal.GATT_CHARACTERISTIC_INTERFACE
+import org.kikermo.bleserver.internal.toAdvertisementProperties
+import org.kikermo.bleserver.internal.toPath
+import org.kikermo.bleserver.internal.toProperties
 
-internal class BLEServerConnector {
+internal class BluezBLEConnector {
     companion object {
 
         private const val DBUS_BUSNAME = "org.freedesktop.DBus"
@@ -25,7 +29,6 @@ internal class BLEServerConnector {
         private const val PATH_ADVERTISEMENT_SUFFIX = "/advertisement"
 
         private const val GATT_SERVICE_INTERFACE = "org.bluez.GattService1"
-        private const val PROPERTY_KEY_VALUE = "Value"
     }
 
     private val dbusConnector = DBusConnectionBuilder.forSystemBus().build()

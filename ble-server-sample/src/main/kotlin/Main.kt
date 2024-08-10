@@ -1,6 +1,7 @@
 package org.kikermo.bleserver
 
-import java.util.*
+import org.kikermo.bleserver.bluez.BluezBLEServerConnector
+import java.util.UUID
 import kotlin.random.Random
 
 private const val UUID_READ_CHARACTERISTIC = "826c171b-e9d9-423c-a241-665bb0b46bfa"
@@ -45,7 +46,8 @@ fun main() {
     val server = BLEServer(
         services = listOf(service),
         serverName = SERVER_NAME,
-        connectionListener = connectionListener
+        connectionListener = connectionListener,
+        bleServerConnector = BluezBLEServerConnector()
     )
     server.primaryService = service
 

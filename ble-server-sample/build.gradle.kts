@@ -3,15 +3,14 @@ plugins {
     application
 }
 
-group = "org.kikermo.bleserver"
-version = "0.0.1"
-
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-    implementation(project(":ble-server"))
+    implementation(libs.bleserver.core)
+    implementation(libs.bleserver.bluez)
 }
 
 kotlin {

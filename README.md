@@ -7,9 +7,46 @@ This project is currently in a very early stage. I built it as a proof of concep
 
 ### Get Started
 
-To use BLE-Server, check out the project from GitHub. To run the sample code you need to run
+To use BLE-Server, check out the project from GitHub and follow this steps:
+
+1. Publish libraries to maven local
 ```
-./gradlew :ble-server-sample:run
+./gradlew publishToMavenLocal
+```
+
+2. Add dependencies to your project
+```gradle
+implementation("org.kikermo.bleserver:core:0.0.1-SNAPSHOT")
+implementation("org.kikermo.bleserver:bluez:0.0.1-SNAPSHOT")
+```
+
+3. Define characteristic
+```kotlin
+    val characteristic = BLECharacteristic(
+        uuid = UUID.fromString(CHARACTERISTIC_UUID),
+        readAccess = BLECharacteristic.AccessType.Read,
+        notifyAccess = BLECharacteristic.AccessType.Notify,
+        name = "mycharacteristic",
+    )
+```
+
+4. Create service
+```kotlin
+val service = BLEService(
+        uuid = UUID.fromString(SERVICE_UUID),
+        name = SERVICE_NAME,
+        characteristics = listOf(characteristics)
+    )
+```
+5. Define and start server
+```kotlin
+  val server = BLEServer(
+        services = listOf(service),
+        serverName = SERVER_NAME,
+        bleServerConnector = BluezBLEServerConnector()
+    )
+
+    server.start()
 ```
 
 ### Contribution
@@ -26,10 +63,10 @@ At this stage, contributions can be made in any of the following ways:
 
 As mentioned before, the project is in an early stage, but these are the features I would like to implement in the following months.
 
-- Local maven publishing. August 2024.
-- Quality checks Q3 2024
-- DSL creation. Q3 2024
-- Beta version on Manven Centra. Q4 2024
-- KMP support Q1,Q2 2025
+- [x] Local maven publishing. August 2024.
+- [ ] Quality checks Q3 2024
+- [ ] DSL creation. Q3 2024
+- [ ] Beta version on Manven Centra. Q4 2024
+- [ ] KMP support Q1,Q2 2025
 
 
