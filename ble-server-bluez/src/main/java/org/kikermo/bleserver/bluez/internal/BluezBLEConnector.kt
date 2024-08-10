@@ -29,7 +29,6 @@ internal class BluezBLEConnector {
         private const val PATH_ADVERTISEMENT_SUFFIX = "/advertisement"
 
         private const val GATT_SERVICE_INTERFACE = "org.bluez.GattService1"
-        private const val PROPERTY_KEY_VALUE = "Value"
     }
 
     private val dbusConnector = DBusConnectionBuilder.forSystemBus().build()
