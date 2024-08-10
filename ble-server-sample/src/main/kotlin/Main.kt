@@ -15,8 +15,10 @@ fun main() {
     val readCharacteristics = BLECharacteristic(
         uuid = UUID.fromString(UUID_READ_CHARACTERISTIC),
         readAccess = BLECharacteristic.AccessType.Read,
-        name = "heartbeat"
+        notifyAccess = BLECharacteristic.AccessType.Notify,
+        name = "heartbeat",
     )
+    readCharacteristics.value = byteArrayOf(1,2,3)
     val writeCharacteristics = BLECharacteristic(
         uuid = UUID.fromString(UUID_WRITE_CHARACTERISTIC),
         readAccess = BLECharacteristic.AccessType.Read,
@@ -32,10 +34,10 @@ fun main() {
     )
     val connectionListener = object : BLEConnectionListener {
         override fun onDeviceConnected(deviceName: String, deviceAddress: String) {
-            println("device connected")
+            println("device connected $deviceName, $deviceAddress")
         }
 
-        override fun onDeviceDisconnected(deviceName: String, deviceAddress: String) {
+        override fun onDeviceDisconnected() {
             println("device disconnected")
         }
 
@@ -45,6 +47,7 @@ fun main() {
         serverName = SERVER_NAME,
         connectionListener = connectionListener
     )
+    server.primaryService = service
 
     server.start()
 

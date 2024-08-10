@@ -1,5 +1,6 @@
 package org.kikermo.bleserver
 
+import org.kikermo.bleserver.exception.BLENoServicesException
 import org.kikermo.bleserver.internal.BLEServerConnector
 
 // AKA BLE Application
@@ -10,10 +11,20 @@ class BLEServer(
 ) {
     private val bleServerConnector = BLEServerConnector()
 
+    private var _selectedPrimaryService: BLEService? = null
+
+    var primaryService: BLEService
+        get() = _selectedPrimaryService ?: services.firstOrNull() ?: throw BLENoServicesException()
+        set(value) {
+            _selectedPrimaryService = value
+        }
+
     fun start() {
         bleServerConnector.startServices(
             bleServices = services,
-            serverName = serverName
+            primaryService = primaryService,
+            serverName = serverName,
+            listener = connectionListener,
         )
     }
 

@@ -10,8 +10,12 @@ class BLECharacteristic(
     val notifyAccess: AccessType.Notify? = null,
 ) {
 
-    var onValueChanged: ((ByteArray) -> Unit)? = null
+    internal var onValueChanged: ((ByteArray) -> Unit)? = null
     var value: ByteArray = byteArrayOf()
+        set(value) {
+            onValueChanged?.let { it(value) }
+            field = value
+        }
 
     sealed class AccessType {
         data object Read : AccessType()

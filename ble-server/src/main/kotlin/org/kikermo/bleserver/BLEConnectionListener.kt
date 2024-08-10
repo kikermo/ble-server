@@ -6,8 +6,5 @@ interface BLEConnectionListener {
         deviceAddress: String,
     )
 
-    fun onDeviceDisconnected(
-        deviceName: String,
-        deviceAddress: String,
-    )
+    fun onDeviceDisconnected()
 }
