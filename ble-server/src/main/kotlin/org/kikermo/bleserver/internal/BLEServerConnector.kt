@@ -4,7 +4,9 @@ import org.bluez.*
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
 import org.freedesktop.dbus.interfaces.*
+import org.freedesktop.dbus.interfaces.Properties.PropertiesChanged
 import org.freedesktop.dbus.types.Variant
+import org.kikermo.bleserver.BLEConnectionListener
 import org.kikermo.bleserver.BLEService
 
 internal class BLEServerConnector {
@@ -23,6 +25,7 @@ internal class BLEServerConnector {
         private const val PATH_ADVERTISEMENT_SUFFIX = "/advertisement"
 
         private const val GATT_SERVICE_INTERFACE = "org.bluez.GattService1"
+        private const val PROPERTY_KEY_VALUE = "Value"
     }
 
     private val dbusConnector = DBusConnectionBuilder.forSystemBus().build()
@@ -30,7 +33,13 @@ internal class BLEServerConnector {
     private lateinit var interfacesAddedSignalHandler: DBusSigHandler<ObjectManager.InterfacesAdded>
     private lateinit var interfacesRemovedSignalHandler: DBusSigHandler<ObjectManager.InterfacesRemoved>
 
-    fun startServices(bleServices: List<BLEService>, adapterAlias: String? = null, serverName: String) {
+    fun startServices(
+        bleServices: List<BLEService>,
+        adapterAlias: String? = null,
+        serverName: String,
+        primaryService: BLEService,
+        listener: BLEConnectionListener?
+    ) {
         val adapterPath = findAdapterPath()
 
         val adapterProperties =
@@ -61,10 +70,11 @@ internal class BLEServerConnector {
         registerGattService(
             bleServices = bleServices,
             gattManager = gattManager,
-            applicationName = serverName
+            applicationName = serverName,
+            primaryService = primaryService,
         )
 
-        initInterfacesHandler()
+        initInterfacesHandler(listener)
     }
 
     private fun registerAdvertisement(
@@ -86,14 +96,19 @@ internal class BLEServerConnector {
         bleServices: List<BLEService>,
         gattManager: GattManager1,
         applicationName: String,
+        primaryService: BLEService,
     ) {
         val managedObject = buildMap {
-            bleServices.forEachIndexed { index, bleService ->
+            bleServices.forEach { bleService ->
                 val servicePath = bleService.toPath(applicationName)
+                val isPrimaryService = bleService == primaryService
                 put(
                     key = servicePath,
-                    value = bleService.toProperties(isPrimary = index == 0, serverName = applicationName)
-                )  // TODO define primary service in API
+                    value = bleService.toProperties(
+                        isPrimary = isPrimaryService,
+                        serverName = applicationName
+                    )
+                )
 
                 bleService.characteristics.forEach { bleCharacteristic ->
                     put(
@@ -122,39 +137,58 @@ internal class BLEServerConnector {
         bleServices.forEach { bleService ->
             val gattService = gattService1(bleService = bleService, applicationName = applicationName)
             bleService.characteristics.forEach { bleCharacteristic ->
+                val characteristicProperties = bleCharacteristic.toProperties(gattService.objectPath)
                 val gattCharacteristic = object : GattCharacteristic1, Properties {
                     override fun getObjectPath(): String {
                         return bleCharacteristic.toPath(bleService.toPath(applicationName).path)
                     }
 
                     override fun <A : Any?> Get(p0: String?, p1: String?): A {
-                        TODO("Not yet implemented")
+                        return characteristicProperties[p0]?.get(p1)?.value as A?
+                            ?: throw RuntimeException("No characteristic")
                     }
 
                     override fun <A : Any?> Set(p0: String?, p1: String?, p2: A) {
-                        TODO("Not yet implemented")
                     }
 
                     override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
                         if (GATT_CHARACTERISTIC_INTERFACE == interfaceName) {
-                            return bleCharacteristic.toProperties(gattService.objectPath)[GATT_CHARACTERISTIC_INTERFACE]
+                            return characteristicProperties[GATT_CHARACTERISTIC_INTERFACE]
                                 ?: throw RuntimeException("Interface [interface_name=$interfaceName]")
                         }
                         throw RuntimeException("Interface [interface_name=$interfaceName]")
                     }
 
                     override fun ReadValue(option: MutableMap<String, Variant<Any>>?): ByteArray {
-                        return byteArrayOf()
+                        return bleCharacteristic.value
                     }
 
                     override fun WriteValue(value: ByteArray?, option: MutableMap<String, Variant<Any>>?) {
+                        if (value == null) {
+                            return
+                        }
+                        bleCharacteristic.writeAccess?.let {
+                            it.onValueChangedListener(value)
+                        }
                     }
 
                     override fun StartNotify() {
-
+                        if (bleCharacteristic.notifyAccess == null) {
+                            return
+                        }
+                        bleCharacteristic.onValueChanged = { value ->
+                            val signal = PropertiesChanged(
+                                /* _path = */ objectPath,
+                                /* _interfaceName = */ GATT_CHARACTERISTIC_INTERFACE,
+                                /* _propertiesChanged = */ mapOf("Value" to Variant(value)),
+                                /* _propertiesRemoved = */ listOf()
+                            )
+                            dbusConnector.sendMessage(signal)
+                        }
                     }
 
                     override fun StopNotify() {
+                        bleCharacteristic.onValueChanged = null
                     }
 
                 }
@@ -188,12 +222,11 @@ internal class BLEServerConnector {
             }
 
             override fun <A : Any?> Get(p0: String?, p1: String?): A {
-                println("Implemented")
-                TODO("Not yet implemented")
+                return serviceProperties[p0]?.get(p1)?.value as A?
+                    ?: throw RuntimeException("Property not found on service")
             }
 
             override fun <A : Any?> Set(p0: String?, p1: String?, p2: A) {
-                TODO("Not yet implemented")
             }
 
             override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
@@ -205,7 +238,6 @@ internal class BLEServerConnector {
             }
         }
     }
-
 
     fun stopServices(serverName: String) {
         val path = PATH_DBUS_DIVIDER + serverName
@@ -254,14 +286,6 @@ internal class BLEServerConnector {
                 ObjectManager::class.java
             ) as ObjectManager
 
-        bluezObjectManager.GetManagedObjects().entries.forEach {
-            println("${it.key} -----")
-            it.value.entries.forEach {
-                println("     ---- ${it.key}")
-            }
-            println("--------")
-        }
-
         return bluezObjectManager.GetManagedObjects().entries.find { entry ->
             entry.value.containsKey(BLUEZ_LE_ADV_INTERFACE)
                     && entry.value.containsKey(BLUEZ_GATT_INTERFACE)
@@ -269,7 +293,7 @@ internal class BLEServerConnector {
         }?.key?.path ?: throw RuntimeException("No BLE adapter found")
     }
 
-    private fun initInterfacesHandler() {
+    private fun initInterfacesHandler(listener: BLEConnectionListener?) {
         val dbus: DBus = dbusConnector.getRemoteObject(
             DBUS_BUSNAME, "/or/freedesktop/DBus",
             DBus::class.java
@@ -282,26 +306,24 @@ internal class BLEServerConnector {
 
         interfacesAddedSignalHandler =
             DBusSigHandler<ObjectManager.InterfacesAdded> { signal ->
-                val iamap: Map<String, Variant<*>>? = signal.interfaces.get(BLUEZ_DEVICE_INTERFACE)
-                if (iamap != null) {
-                    val address: Variant<String> = iamap["Address"] as Variant<String>
-                    println("Device address: " + address.value)
-                    println("Device added path: " + signal.getObjectPath().toString())
-//                    hasDeviceConnected = true
-//                    if (listener != null) {
-//                        listener.deviceConnected()
-//                    }
+                val iamap: Map<String, Variant<*>>? = signal.interfaces[BLUEZ_DEVICE_INTERFACE]
+                iamap?.let {
+                    val address: Variant<String> = it["Address"] as Variant<String>
+                    val alias: Variant<String> = it["Alias"] as Variant<String>
+
+                    listener?.onDeviceConnected(
+                        deviceAddress = address.value,
+                        deviceName = alias.value
+                    )
                 }
             }
 
         interfacesRemovedSignalHandler =
             DBusSigHandler<ObjectManager.InterfacesRemoved> { signal ->
+                println(signal.name)
+                println(signal.interfaces.joinToString(","))
                 signal.interfaces.filter { it == BLUEZ_DEVICE_INTERFACE }.forEach { ir ->
-                    println("Device Removed path: " + signal.getObjectPath().toString())
-//                    hasDeviceConnected = false
-//                    if (listener != null) {
-//                        listener.deviceDisconnected()
-//                    }
+                    listener?.onDeviceDisconnected()
                 }
             }
 
