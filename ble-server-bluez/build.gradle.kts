@@ -25,8 +25,7 @@ dependencies {
     implementation(libs.log4j.impl)
 
     testImplementation(libs.junit.core)
-//    testImplementation(libs.junit.api)
-//    testRuntimeOnly(libs.junit.runtime)
+    testImplementation(kotlin("test"))
 }
 
 tasks.test {
