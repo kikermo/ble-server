@@ -2,6 +2,7 @@
 bleserver = "0.0.1-SNAPSHOT"
 dbus = "5.0.0"
 log4j = "2.17.2"
+junit = "5.11.0"
 
 [libraries]
 bleserver-core = { module = "org.kikermo.bleserver:core", version.ref = "bleserver"}
@@ -16,3 +17,7 @@ dbus-transport-tcp = { module = "com.github.hypfvieh:dbus-java-transport-tcp" } 
 
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 log4j-impl = { module = "org.apache.logging.log4j:log4j-slf4j-impl", version.ref = "log4j" }
+
+junit-core = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-runtime ={ module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }

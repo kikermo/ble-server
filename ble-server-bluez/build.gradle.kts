@@ -23,6 +23,14 @@ dependencies {
 
     implementation(libs.log4j.api)
     implementation(libs.log4j.impl)
+
+    testImplementation(libs.junit.core)
+//    testImplementation(libs.junit.api)
+//    testRuntimeOnly(libs.junit.runtime)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 publishing {
