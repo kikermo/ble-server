@@ -1,5 +1,6 @@
 package org.kikermo.bleserver.bluez.internal
 
+import org.freedesktop.dbus.DBusPath
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.kikermo.bleserver.BLECharacteristic
@@ -31,6 +32,8 @@ class BLEPropertiesTest {
         assertNotNull(result["org.bluez.GattCharacteristic1"])
         assertEquals(characteristicUUID.toString(), result["org.bluez.GattCharacteristic1"]?.get("UUID")?.value)
         assertNotNull(result["org.bluez.GattCharacteristic1"]?.get("Service"))
+        val serviceDBusPath = result["org.bluez.GattCharacteristic1"]?.get("Service")?.value
+        assertEquals(DBusPath(servicePath), serviceDBusPath)
     }
 
     @Test
