@@ -23,6 +23,13 @@ dependencies {
 
     implementation(libs.log4j.api)
     implementation(libs.log4j.impl)
+
+    testImplementation(libs.junit.core)
+    testImplementation(kotlin("test"))
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 publishing {
