@@ -7,7 +7,7 @@ import org.kikermo.bleserver.BLEService
 
 internal const val GATT_CHARACTERISTIC_INTERFACE = "org.bluez.GattCharacteristic1"
 private const val GATT_SERVICE_INTERFACE = "org.bluez.GattService1"
-private const val LEADVERTISEMENT_INTERFACE = "org.bluez.LEAdvertisement1"
+private const val LE_ADVERTISEMENT_INTERFACE = "org.bluez.LEAdvertisement1"
 
 private const val SERVICE_UUID_PROPERTY_KEY = "UUID";
 private const val SERVICE_PRIMARY_PROPERTY_KEY = "Primary";
@@ -74,7 +74,7 @@ internal fun toAdvertisementProperties(
         put(ADVERTISEMENT_LOCAL_NAME_PROPERTY_KEY, Variant(serverName))
         put(ADVERTISEMENT_INCLUDE_TX_POWER_PROPERTY_KEY, Variant(true))
     }.toMutableMap()
-    put(LEADVERTISEMENT_INTERFACE, advertisementProperties)
+    put(LE_ADVERTISEMENT_INTERFACE, advertisementProperties)
 }.toMutableMap()
 
 private fun BLECharacteristic.toFlags(): Array<String> {

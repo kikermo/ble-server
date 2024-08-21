@@ -4,6 +4,7 @@ import org.freedesktop.dbus.DBusPath
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.kikermo.bleserver.BLECharacteristic
+import org.kikermo.bleserver.BLEService
 import org.kikermo.bleserver.internal.toProperties
 import java.util.*
 import kotlin.test.assertEquals
@@ -14,7 +15,10 @@ class BLEPropertiesTest {
     private val characteristicName = "sampleCharacteristic"
 
     private val servicePath = "/sample/sampleService"
+    private val serviceUUID = UUID.randomUUID()
+    private val serviceName = "sampleService"
 
+    private val serverName = "sampleServer"
 
     @Test
     @DisplayName("map characteristic")
@@ -61,7 +65,7 @@ class BLEPropertiesTest {
             uuid = characteristicUUID,
             name = characteristicName,
             readAccess = BLECharacteristic.AccessType.Read,
-            writeAccess = BLECharacteristic.AccessType.Write{},
+            writeAccess = BLECharacteristic.AccessType.Write {},
             notifyAccess = BLECharacteristic.AccessType.Notify
         )
 
@@ -73,5 +77,25 @@ class BLEPropertiesTest {
         assert(flags.contains("read"))
         assert(flags.contains("write"))
         assert(flags.contains("notify"))
+    }
+
+    @Test
+    @DisplayName("map service")
+    fun mapService() {
+        // given
+        val bleService = BLEService(
+            uuid = serviceUUID,
+            name = serviceName,
+            characteristics = listOf()
+        )
+
+        // when
+        val result = bleService.toProperties(true, serviceName)
+
+        // then
+        assertNotNull(result["org.bluez.GattService1"])
+        assertEquals(serviceUUID.toString(), result["org.bluez.GattService1"]?.get("UUID")?.value)
+        assertEquals(true,result["org.bluez.GattService1"]?.get("Primary")?.value)
+        assertNotNull(result["org.bluez.GattService1"]?.get("Characteristics"))
     }
 }
