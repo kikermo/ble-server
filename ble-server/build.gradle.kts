@@ -3,10 +3,6 @@ plugins {
     `maven-publish`
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
 }
 
@@ -16,12 +12,12 @@ kotlin {
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
+        create<MavenPublication>("mavenLocal") {
             groupId = "org.kikermo.bleserver"
             artifactId = "core"
             version = libs.versions.bleserver.get()
 
-            from(components["java"])
+            from(components["kotlin"])
         }
     }
 }

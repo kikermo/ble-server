@@ -3,11 +3,6 @@ plugins {
     application
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 dependencies {
     implementation(libs.bleserver.core)
     implementation(libs.bleserver.bluez)

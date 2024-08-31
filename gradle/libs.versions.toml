@@ -4,9 +4,12 @@ dbus = "5.0.0"
 log4j = "2.17.2"
 junit = "5.11.0"
 
+# Plugins
+mavenDeployer = "0.14.0"
+
 [libraries]
-bleserver-core = { module = "org.kikermo.bleserver:core", version.ref = "bleserver"}
-bleserver-bluez = { module = "org.kikermo.bleserver:bluez", version.ref = "bleserver"}
+bleserver-core = { module = "org.kikermo.bleserver:core", version.ref = "bleserver" }
+bleserver-bluez = { module = "org.kikermo.bleserver:bluez", version.ref = "bleserver" }
 
 dbus-bom = { module = "com.github.hypfvieh:dbus-java-bom", version.ref = "dbus" }
 dbus-core = { module = "com.github.hypfvieh:dbus-java-core" }
@@ -20,4 +23,7 @@ log4j-impl = { module = "org.apache.logging.log4j:log4j-slf4j-impl", version.ref
 
 junit-core = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
-junit-runtime ={ module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-runtime = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+
+[plugins]
+mavenDeployer = { id = "io.deepmedia.tools.deployer", version.ref = "mavenDeployer" }
