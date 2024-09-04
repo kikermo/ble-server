@@ -57,15 +57,8 @@ signing {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenLocal") {
-            groupId = PubilsInfo.groupId
-            artifactId = PubilsInfo.artifactId
-            version = libs.versions.bleserver.get()
 
-            from(components["java"])
-        }
-
-        create<MavenPublication>("mavenCentral") {
+        create<MavenPublication>("maven") {
             groupId = PubilsInfo.groupId
             artifactId = PubilsInfo.artifactId
             version = project.version.toString()
