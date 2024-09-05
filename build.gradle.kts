@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.0.0"
-   // id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+    // id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+//    id("org.jreleaser") version "1.14.0"
 }
 
 group = "org.kikermo.bleserver"
@@ -18,6 +19,24 @@ object Meta {
     const val release = "https://s01.oss.sonatype.org/service/local/"
     const val snapshot = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 }
+
+//jreleaser {
+//    signing {
+//        setActive("ALWAYS")
+//        armored = true
+//    }
+//    deploy {
+//        maven {
+//            mavenCentral {
+//                create("sonatype") {
+//                    setActive( "ALWAYS")
+//                    url = "https://central.sonatype.com/api/v1/publisher"
+//                    stagingRepository("target/staging-deploy")
+//                }
+//            }
+//        }
+//    }
+//}
 
 //nexusPublishing {
 //    repositories {

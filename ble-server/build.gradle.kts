@@ -12,7 +12,7 @@ kotlin {
 
 publishing {
     publications {
-        create<MavenPublication>("mavenLocal") {
+        create<MavenPublication>("maven") {
             groupId = "org.kikermo.bleserver"
             artifactId = "core"
             version = libs.versions.bleserver.get()
