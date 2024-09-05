@@ -2,7 +2,7 @@ plugins {
     id("java")
     kotlin("jvm")
     `maven-publish`
- //   signing
+    signing
 }
 
 kotlin {
@@ -44,77 +44,77 @@ object PubilsInfo {
     const val snapshot = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 }
 
-//signing {
-//    val signingKey = providers
-//        .environmentVariable("GPG_SIGNING_KEY")
-//        .forUseAtConfigurationTime()
-//    val signingPassphrase = providers
-//        .environmentVariable("GPG_SIGNING_PASSPHRASE")
-//        .forUseAtConfigurationTime()
-//    if (signingKey.isPresent && signingPassphrase.isPresent) {
-//        useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
-//        val extension = extensions
-//            .getByName("publishing") as PublishingExtension
-//        sign(extension.publications)
-//    }
-//}
-//
-//publishing {
-//    publications {
-//
-//        create<MavenPublication>("maven") {
-//            groupId = PubilsInfo.groupId
-//            artifactId = PubilsInfo.artifactId
-//            version = project.version.toString()
-//
-//            from(components["java"])
-////            artifact(tasks["sourcesJar"])
-////            artifact(tasks["javadocJar"])
-//            pom {
-//                name.set(project.name)
-//                description.set(PubilsInfo.desc)
-//                url.set("https://github.com/${PubilsInfo.githubRepo}")
-//                licenses {
-//                    license {
-//                        name.set(PubilsInfo.license)
-//                        url.set("https://opensource.org/licenses/Apache-2.0")
-//                    }
-//                }
-//                developers {
-//                    developer {
-//                        id.set("kikermo")
-//                        name.set("Enrique Ramirez")
-//                        //organization.set("")
-//                        //organizationUrl.set("https://kikermo.org/")
-//                    }
-//                }
-//                scm {
-//                    url.set(
-//                        "https://github.com/${PubilsInfo.githubRepo}.git"
-//                    )
-//                    connection.set(
-//                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git"
-//                    )
-//                    developerConnection.set(
-//                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git"
-//                    )
-//                }
-//                issueManagement {
-//                    url.set("https://github.com/${PubilsInfo.githubRepo}/issues")
-//                }
-//            }
-//        }
-//    }
-//}
+signing {
+    val signingKey = providers
+        .environmentVariable("GPG_SIGNING_KEY")
+        .forUseAtConfigurationTime()
+    val signingPassphrase = providers
+        .environmentVariable("GPG_SIGNING_PASSPHRASE")
+        .forUseAtConfigurationTime()
+    if (signingKey.isPresent && signingPassphrase.isPresent) {
+        useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
+        val extension = extensions
+            .getByName("publishing") as PublishingExtension
+        sign(extension.publications)
+    }
+}
 
 publishing {
     publications {
-        create<MavenPublication>("maven") {
-            groupId = "org.kikermo.bleserver"
-            artifactId = "core"
-            version = libs.versions.bleserver.get()
 
-            from(components["kotlin"])
+        create<MavenPublication>("maven") {
+            groupId = PubilsInfo.groupId
+            artifactId = PubilsInfo.artifactId
+            version = project.version.toString()
+
+            from(components["java"])
+//            artifact(tasks["sourcesJar"])
+//            artifact(tasks["javadocJar"])
+            pom {
+                name.set(project.name)
+                description.set(PubilsInfo.desc)
+                url.set("https://github.com/${PubilsInfo.githubRepo}")
+                licenses {
+                    license {
+                        name.set(PubilsInfo.license)
+                        url.set("https://opensource.org/licenses/Apache-2.0")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("kikermo")
+                        name.set("Enrique Ramirez")
+                        //organization.set("")
+                        //organizationUrl.set("https://kikermo.org/")
+                    }
+                }
+                scm {
+                    url.set(
+                        "https://github.com/${PubilsInfo.githubRepo}.git"
+                    )
+                    connection.set(
+                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git"
+                    )
+                    developerConnection.set(
+                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git"
+                    )
+                }
+                issueManagement {
+                    url.set("https://github.com/${PubilsInfo.githubRepo}/issues")
+                }
+            }
         }
     }
 }
+
+//publishing {
+//    publications {
+//        create<MavenPublication>("maven") {
+//            groupId = "org.kikermo.bleserver"
+//            artifactId = "core"
+//            version = libs.versions.bleserver.get()
+//
+//            from(components["kotlin"])
+//        }
+//    }
+//}
