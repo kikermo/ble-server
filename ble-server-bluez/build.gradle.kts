@@ -1,12 +1,15 @@
+import org.jreleaser.model.Active
+
 plugins {
     id("java")
     kotlin("jvm")
     `maven-publish`
-    signing
+//    signing
+    id("org.jreleaser") version "1.14.0"
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 repositories {
@@ -44,20 +47,6 @@ object PubilsInfo {
     const val snapshot = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 }
 
-signing {
-    val signingKey = providers
-        .environmentVariable("GPG_SIGNING_KEY")
-        .forUseAtConfigurationTime()
-    val signingPassphrase = providers
-        .environmentVariable("GPG_SIGNING_PASSPHRASE")
-        .forUseAtConfigurationTime()
-    if (signingKey.isPresent && signingPassphrase.isPresent) {
-        useInMemoryPgpKeys(signingKey.get(), signingPassphrase.get())
-        val extension = extensions
-            .getByName("publishing") as PublishingExtension
-        sign(extension.publications)
-    }
-}
 
 publishing {
     publications {
@@ -65,7 +54,8 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = PubilsInfo.groupId
             artifactId = PubilsInfo.artifactId
-            version = project.version.toString()
+//            version = project.version.toString()
+            version = "0.0.1"
 
             from(components["java"])
 //            artifact(tasks["sourcesJar"])
@@ -106,6 +96,50 @@ publishing {
         }
     }
 }
+
+
+jreleaser {
+    dryrun = false
+
+    // Used for creating a tagged release, uploading files and generating changelog.
+    // In the future we can set this up to push release tags to GitHub, but for now it's
+    // set up to do nothing.
+    // https://jreleaser.org/guide/latest/reference/release/index.html
+    release {
+        generic {
+            enabled = true
+            skipRelease = true
+        }
+    }
+
+    // Used to announce a release to configured announcers.
+    // https://jreleaser.org/guide/latest/reference/announce/index.html
+    announce {
+        active = Active.NEVER
+    }
+
+    // Signing configuration.
+    // https://jreleaser.org/guide/latest/reference/signing.html
+    signing {
+        active = Active.ALWAYS
+        armored = true
+        publicKey.set(File("public.pgp").readText())
+        secretKey.set(File("private.pgp").readText())
+    }
+
+    deploy {
+        maven {
+            mavenCentral {
+                create("sonatype") {
+                    setActive( "ALWAYS")
+                    url = "https://central.sonatype.com/api/v1/publisher"
+                    stagingRepository("target/staging-deploy")
+                }
+            }
+        }
+    }
+}
+
 
 //publishing {
 //    publications {

@@ -3,6 +3,10 @@ plugins {
     `maven-publish`
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
 }
 
