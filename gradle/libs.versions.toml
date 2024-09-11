@@ -1,5 +1,5 @@
 [versions]
-bleserver = "0.0.1-SNAPSHOT"
+bleserver = "0.0.1"
 dbus = "5.0.0"
 log4j = "2.17.2"
 junit = "5.11.0"
