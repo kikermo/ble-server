@@ -15,3 +15,7 @@ out/
 
 ### Mac OS ###
 .DS_Store
+
+*.pgp
+.mainframer
+mainframer.sh

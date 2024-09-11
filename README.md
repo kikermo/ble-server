@@ -7,20 +7,13 @@ This project is currently in a very early stage. I built it as a proof of concep
 
 ### Get Started
 
-To use BLE-Server, check out the project from GitHub and follow this steps:
-
-1. Publish libraries to maven local
-```
-./gradlew publishToMavenLocal
-```
-
-2. Add dependencies to your project
+1. Add dependencies to your project
 ```gradle
-implementation("org.kikermo.bleserver:core:0.0.1-SNAPSHOT")
-implementation("org.kikermo.bleserver:bluez:0.0.1-SNAPSHOT")
+implementation("org.kikermo.bleserver:core:0.0.1")
+implementation("org.kikermo.bleserver:bluez:0.0.1")
 ```
 
-3. Define characteristic
+2. Define characteristic
 ```kotlin
     val characteristic = BLECharacteristic(
         uuid = UUID.fromString(CHARACTERISTIC_UUID),
@@ -30,7 +23,7 @@ implementation("org.kikermo.bleserver:bluez:0.0.1-SNAPSHOT")
     )
 ```
 
-4. Create service
+3. Create service
 ```kotlin
 val service = BLEService(
         uuid = UUID.fromString(SERVICE_UUID),
@@ -38,7 +31,7 @@ val service = BLEService(
         characteristics = listOf(characteristics)
     )
 ```
-5. Define and start server
+4. Define and start server
 ```kotlin
   val server = BLEServer(
         services = listOf(service),

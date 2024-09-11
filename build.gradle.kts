@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "org.kikermo.bleserver"
-version = "1.0-SNAPSHOT"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
@@ -11,4 +11,14 @@ repositories {
 
 kotlin {
     jvmToolchain(11)
+}
+
+allprojects {
+    group = "org.kikermo.bleserver"
+    version = "0.0.1"
+}
+
+object Meta {
+    const val release = "https://s01.oss.sonatype.org/service/local/"
+    const val snapshot = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 }
