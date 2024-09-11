@@ -61,8 +61,6 @@ publishing {
             version = "0.0.1"
 
             from(components["java"])
-            //    artifact(tasks["sourcesJar"])
-            //    artifact(tasks["javadocJar"])
 
             pom {
                 name.set(project.name)
