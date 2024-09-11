@@ -43,7 +43,7 @@ object PubilsInfo {
     const val groupId = "org.kikermo.bleserver"
     const val artifactId = "bluez"
 
-    const val desc = "BLUZ implementation for BleServer"
+    const val desc = "BLUEZ implementation for BleServer"
     const val license = "Apache-2.0"
     const val githubRepo = "kikermo/ble-server"
     const val release = "https://s01.oss.sonatype.org/service/local/"
