@@ -8,6 +8,11 @@ dependencies {
     implementation(libs.bleserver.bluez)
 }
 
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
 kotlin {
     jvmToolchain(17)
 }
