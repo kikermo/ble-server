@@ -1,16 +1,19 @@
-import org.jreleaser.model.Active
-
 plugins {
     id("java")
     kotlin("jvm")
     `maven-publish`
-//    signing
-    id("org.jreleaser") version "1.14.0"
+    signing
 }
 
 kotlin {
     jvmToolchain(17)
 }
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 
 repositories {
     mavenCentral()
@@ -58,8 +61,9 @@ publishing {
             version = "0.0.1"
 
             from(components["java"])
-//            artifact(tasks["sourcesJar"])
-//            artifact(tasks["javadocJar"])
+            //    artifact(tasks["sourcesJar"])
+            //    artifact(tasks["javadocJar"])
+
             pom {
                 name.set(project.name)
                 description.set(PubilsInfo.desc)
@@ -97,58 +101,6 @@ publishing {
     }
 }
 
-
-jreleaser {
-    dryrun = false
-
-    // Used for creating a tagged release, uploading files and generating changelog.
-    // In the future we can set this up to push release tags to GitHub, but for now it's
-    // set up to do nothing.
-    // https://jreleaser.org/guide/latest/reference/release/index.html
-    release {
-        generic {
-            enabled = true
-            skipRelease = true
-        }
-    }
-
-    // Used to announce a release to configured announcers.
-    // https://jreleaser.org/guide/latest/reference/announce/index.html
-    announce {
-        active = Active.NEVER
-    }
-
-    // Signing configuration.
-    // https://jreleaser.org/guide/latest/reference/signing.html
-    signing {
-        active = Active.ALWAYS
-        armored = true
-        publicKey.set(File("public.pgp").readText())
-        secretKey.set(File("private.pgp").readText())
-    }
-
-    deploy {
-        maven {
-            mavenCentral {
-                create("sonatype") {
-                    setActive( "ALWAYS")
-                    url = "https://central.sonatype.com/api/v1/publisher"
-                    stagingRepository("target/staging-deploy")
-                }
-            }
-        }
-    }
+signing {
+    sign(publishing.publications["maven"])
 }
-
-
-//publishing {
-//    publications {
-//        create<MavenPublication>("maven") {
-//            groupId = "org.kikermo.bleserver"
-//            artifactId = "core"
-//            version = libs.versions.bleserver.get()
-//
-//            from(components["kotlin"])
-//        }
-//    }
-//}
