@@ -4,8 +4,10 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.bleserver.core)
-    implementation(libs.bleserver.bluez)
+//    implementation(libs.bleserver.core)
+//    implementation(libs.bleserver.bluez)
+    implementation(project(":ble-server"))
+    implementation(project(":ble-server-bluez"))
 }
 
 repositories {

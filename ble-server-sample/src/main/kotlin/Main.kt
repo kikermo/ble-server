@@ -28,11 +28,17 @@ fun main() {
         },
         name = "temperature"
     )
-    val service = BLEService(
-        uuid = UUID.fromString(UUID_SERVICE),
-        name = SERVICE_NAME,
-        characteristics = listOf(writeCharacteristics, readCharacteristics)
-    )
+//    val service = BLEService(
+//        uuid = UUID.fromString(UUID_SERVICE),
+//        name = SERVICE_NAME,
+//        characteristics = listOf(writeCharacteristics, readCharacteristics)
+//    )
+    val service = BLEService.Builder()
+        .uuid(UUID.fromString(UUID_SERVICE))
+        .name(SERVICE_NAME)
+        .characteristics(listOf(writeCharacteristics,readCharacteristics))
+        .build()
+
     val connectionListener = object : BLEConnectionListener {
         override fun onDeviceConnected(deviceName: String, deviceAddress: String) {
             println("device connected $deviceName, $deviceAddress")
@@ -50,6 +56,10 @@ fun main() {
         bleServerConnector = BluezBLEServerConnector()
     )
     server.primaryService = service
+
+
+
+
 
     server.start()
 
