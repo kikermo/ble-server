@@ -1,6 +1,7 @@
 package org.kikermo.bleserver
 
 import org.kikermo.bleserver.bluez.BluezBLEServerConnector
+import org.kikermo.bleserver.dsl.bleService
 import java.util.UUID
 import kotlin.random.Random
 
@@ -9,6 +10,8 @@ private const val UUID_WRITE_CHARACTERISTIC = "9371ef59-c4ce-4bea-a33a-1946b2ef2
 private const val UUID_SERVICE = "215f404b-1413-4b38-90d6-72c183eea77a"
 private const val SERVER_NAME = "sampleble"
 private const val SERVICE_NAME = "sampleservice"
+
+private fun String.toUUID() = UUID.fromString(this)
 
 fun main() {
     println("Hello BLE")
@@ -19,7 +22,7 @@ fun main() {
         notifyAccess = BLECharacteristic.AccessType.Notify,
         name = "heartbeat",
     )
-    readCharacteristics.value = byteArrayOf(1,2,3)
+    readCharacteristics.value = byteArrayOf(1, 2, 3)
     val writeCharacteristics = BLECharacteristic(
         uuid = UUID.fromString(UUID_WRITE_CHARACTERISTIC),
         readAccess = BLECharacteristic.AccessType.Read,
@@ -33,11 +36,17 @@ fun main() {
 //        name = SERVICE_NAME,
 //        characteristics = listOf(writeCharacteristics, readCharacteristics)
 //    )
-    val service = BLEService.Builder()
-        .uuid(UUID.fromString(UUID_SERVICE))
-        .name(SERVICE_NAME)
-        .characteristics(listOf(writeCharacteristics,readCharacteristics))
-        .build()
+//    val service = BLEService.Builder()
+//        .uuid(UUID.fromString(UUID_SERVICE))
+//        .name(SERVICE_NAME)
+//        .characteristics(listOf(writeCharacteristics,readCharacteristics))
+//        .build()
+
+    val service = bleService {
+        uuid = UUID_SERVICE.toUUID()
+        name = SERVICE_NAME
+        characteristics = listOf(writeCharacteristics, readCharacteristics)
+    }
 
     val connectionListener = object : BLEConnectionListener {
         override fun onDeviceConnected(deviceName: String, deviceAddress: String) {
@@ -56,9 +65,6 @@ fun main() {
         bleServerConnector = BluezBLEServerConnector()
     )
     server.primaryService = service
-
-
-
 
 
     server.start()
