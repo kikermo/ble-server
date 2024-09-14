@@ -1,4 +1,4 @@
-package org.kikermo.bleserver.internal
+package org.kikermo.bleserver.bluez.internal
 
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.types.Variant

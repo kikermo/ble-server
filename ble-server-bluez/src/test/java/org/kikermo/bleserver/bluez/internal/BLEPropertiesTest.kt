@@ -5,8 +5,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.kikermo.bleserver.BLECharacteristic
 import org.kikermo.bleserver.BLEService
-import org.kikermo.bleserver.internal.toProperties
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -17,8 +16,6 @@ class BLEPropertiesTest {
     private val servicePath = "/sample/sampleService"
     private val serviceUUID = UUID.randomUUID()
     private val serviceName = "sampleService"
-
-    private val serverName = "sampleServer"
 
     @Test
     @DisplayName("map characteristic")
@@ -95,7 +92,7 @@ class BLEPropertiesTest {
         // then
         assertNotNull(result["org.bluez.GattService1"])
         assertEquals(serviceUUID.toString(), result["org.bluez.GattService1"]?.get("UUID")?.value)
-        assertEquals(true,result["org.bluez.GattService1"]?.get("Primary")?.value)
+        assertEquals(true, result["org.bluez.GattService1"]?.get("Primary")?.value)
         assertNotNull(result["org.bluez.GattService1"]?.get("Characteristics"))
     }
 }

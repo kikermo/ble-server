@@ -1,4 +1,4 @@
-package org.kikermo.bleserver
+package org.kikermo.bleserver.sample
 
 import java.util.UUID
 

@@ -1,17 +1,23 @@
 package org.kikermo.bleserver.bluez.internal
 
-import org.bluez.*
+import org.bluez.GattApplication1
+import org.bluez.GattCharacteristic1
+import org.bluez.GattManager1
+import org.bluez.GattService1
+import org.bluez.LEAdvertisement1
+import org.bluez.LEAdvertisingManager1
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
-import org.freedesktop.dbus.interfaces.*
+import org.freedesktop.dbus.interfaces.DBus
+import org.freedesktop.dbus.interfaces.DBusInterface
+import org.freedesktop.dbus.interfaces.DBusSigHandler
+import org.freedesktop.dbus.interfaces.ObjectManager
+import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.dbus.interfaces.Properties.PropertiesChanged
 import org.freedesktop.dbus.types.Variant
 import org.kikermo.bleserver.BLEConnectionListener
 import org.kikermo.bleserver.BLEService
-import org.kikermo.bleserver.internal.GATT_CHARACTERISTIC_INTERFACE
-import org.kikermo.bleserver.internal.toAdvertisementProperties
-import org.kikermo.bleserver.internal.toPath
-import org.kikermo.bleserver.internal.toProperties
+import org.kikermo.bleserver.bluez.exception.BLUEZException
 
 internal class BluezBLEConnector {
     companion object {
@@ -148,18 +154,19 @@ internal class BluezBLEConnector {
 
                     override fun <A : Any?> Get(p0: String?, p1: String?): A {
                         return characteristicProperties[p0]?.get(p1)?.value as A?
-                            ?: throw RuntimeException("No characteristic")
+                            ?: throw BLUEZException("Missing characteristic")
                     }
 
                     override fun <A : Any?> Set(p0: String?, p1: String?, p2: A) {
+                        // No-OP
                     }
 
                     override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
                         if (GATT_CHARACTERISTIC_INTERFACE == interfaceName) {
                             return characteristicProperties[GATT_CHARACTERISTIC_INTERFACE]
-                                ?: throw RuntimeException("Interface [interface_name=$interfaceName]")
+                                ?: throw BLUEZException("Interface [interface_name=$interfaceName]")
                         }
-                        throw RuntimeException("Interface [interface_name=$interfaceName]")
+                        throw BLUEZException("Interface [interface_name=$interfaceName]")
                     }
 
                     override fun ReadValue(option: MutableMap<String, Variant<Any>>?): ByteArray {
@@ -226,18 +233,19 @@ internal class BluezBLEConnector {
 
             override fun <A : Any?> Get(p0: String?, p1: String?): A {
                 return serviceProperties[p0]?.get(p1)?.value as A?
-                    ?: throw RuntimeException("Property not found on service")
+                    ?: throw BLUEZException("Property not found on service")
             }
 
             override fun <A : Any?> Set(p0: String?, p1: String?, p2: A) {
+                // No-OP
             }
 
             override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
                 if (GATT_SERVICE_INTERFACE == interfaceName) {
                     return serviceProperties[GATT_SERVICE_INTERFACE]
-                        ?: throw RuntimeException("No $GATT_SERVICE_INTERFACE found on service")
+                        ?: throw BLUEZException("No $GATT_SERVICE_INTERFACE found on service")
                 }
-                throw RuntimeException("Interface $interfaceName doesn't match $GATT_SERVICE_INTERFACE")
+                throw BLUEZException("Interface $interfaceName doesn't match $GATT_SERVICE_INTERFACE")
             }
         }
     }
@@ -265,7 +273,7 @@ internal class BluezBLEConnector {
 
             override fun <A : Any?> Get(interfaceName: String, propertyName: String): A {
                 return (properties[interfaceName]?.get(propertyName) as? A)
-                    ?: throw RuntimeException("Incompatible types")
+                    ?: throw BLUEZException("Incompatible types")
             }
 
             override fun <A : Any?> Set(interfaceName: String, propertyName: String, propertyValue: A) {
@@ -276,7 +284,7 @@ internal class BluezBLEConnector {
 
             override fun GetAll(interfaceName: String): MutableMap<String, Variant<*>> {
                 return properties[interfaceName]
-                    ?: throw RuntimeException("Wrong interface [interface_name=$interfaceName]")
+                    ?: throw BLUEZException("Wrong interface [interface_name=$interfaceName]")
             }
         }
     }
@@ -293,7 +301,7 @@ internal class BluezBLEConnector {
             entry.value.containsKey(BLUEZ_LE_ADV_INTERFACE)
                     && entry.value.containsKey(BLUEZ_GATT_INTERFACE)
 
-        }?.key?.path ?: throw RuntimeException("No BLE adapter found")
+        }?.key?.path ?: throw BLUEZException("No BLE adapter found")
     }
 
     private fun initInterfacesHandler(listener: BLEConnectionListener?) {
