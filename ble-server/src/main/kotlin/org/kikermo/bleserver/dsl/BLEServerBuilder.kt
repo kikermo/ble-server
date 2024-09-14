@@ -19,7 +19,9 @@ class BLEServerBuilder {
     }
 
     fun primaryService(block: BLEServiceBuilder.() -> Unit) {
-        primaryService = BLEServiceBuilder().apply(block).build()
+        val primaryService = BLEServiceBuilder().apply(block).build()
+        this.primaryService = primaryService
+        services.add(primaryService)
     }
 
     fun connectionListener(block: BLEConnectionListenerBuilder.() -> Unit) {
