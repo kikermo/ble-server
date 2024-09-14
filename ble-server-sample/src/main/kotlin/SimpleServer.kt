@@ -55,8 +55,6 @@ fun runSimpleServer() {
     )
     server.primaryService = primaryService
 
-
-
     server.start()
 
     while (true) {
