@@ -2,7 +2,6 @@ package org.kikermo.bleserver
 
 import org.kikermo.bleserver.bluez.BluezBLEServerConnector
 import org.kikermo.bleserver.dsl.bleServer
-import org.kikermo.bleserver.dsl.bleService
 import java.util.UUID
 
 private const val UUID_READ_CHARACTERISTIC = "826c171b-e9d9-423c-a241-665bb0b46bfa"
@@ -74,26 +73,25 @@ fun main() {
             }
         }
 
-        primaryService = bleService {
+        primaryService {
             uuid = UUID_SERVICE.toUUID()
             name = SERVICE_NAME
 
-            characteristics {
-                characteristic {
-                    uuid = UUID_READ_CHARACTERISTIC.toUUID()
 
-                    readAccess = BLECharacteristic.AccessType.Read
-                    notifyAccess = BLECharacteristic.AccessType.Notify
-                    name = "heartbeat"
+            characteristic {
+                uuid = UUID_READ_CHARACTERISTIC.toUUID()
+
+                readAccess = BLECharacteristic.AccessType.Read
+                notifyAccess = BLECharacteristic.AccessType.Notify
+                name = "heartbeat"
+            }
+            characteristic {
+                uuid = UUID_WRITE_CHARACTERISTIC.toUUID()
+                readAccess = BLECharacteristic.AccessType.Read
+                writeAccess = BLECharacteristic.AccessType.Write { value ->
+                    println("New value - $value")
                 }
-                characteristic {
-                    uuid = UUID_WRITE_CHARACTERISTIC.toUUID()
-                    readAccess = BLECharacteristic.AccessType.Read
-                    writeAccess = BLECharacteristic.AccessType.Write { value ->
-                        println("New value - $value")
-                    }
-                    name = "temperature"
-                }
+                name = "temperature"
             }
         }
     }

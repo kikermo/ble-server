@@ -22,6 +22,6 @@ class BLECharacteristicBuilder {
     )
 }
 
-fun characteristic(
-    block: BLECharacteristicBuilder.() -> Unit
-): BLECharacteristic = BLECharacteristicBuilder().apply(block).build()
+//fun characteristic(
+//    block: BLECharacteristicBuilder.() -> Unit
+//): BLECharacteristic = BLECharacteristicBuilder().apply(block).build()
