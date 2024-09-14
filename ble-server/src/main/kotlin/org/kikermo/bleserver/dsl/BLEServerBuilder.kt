@@ -8,8 +8,10 @@ import org.kikermo.bleserver.exception.BLEBuilderException
 
 class BLEServerBuilder {
     var serverName: String? = null
-    private var connectionListener: BLEConnectionListener? = null
     var bleServerConnector: BLEServerConnector? = null
+    var autoStart: Boolean = true
+
+    private var connectionListener: BLEConnectionListener? = null
     private var primaryService: BLEService? = null
 
     private var services: MutableList<BLEService> = mutableListOf()
@@ -42,6 +44,10 @@ class BLEServerBuilder {
     ).apply {
         this@BLEServerBuilder.primaryService?.let { builderPrimaryService ->
             primaryService = builderPrimaryService
+        }
+
+        if(autoStart) {
+            start()
         }
     }
 }

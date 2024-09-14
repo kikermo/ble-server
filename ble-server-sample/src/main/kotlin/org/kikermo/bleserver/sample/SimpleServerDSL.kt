@@ -62,7 +62,6 @@ fun runSimpleServerDSL() {
 //        }
     }
 
-    server.start()
 
     while (true) {
         try {
