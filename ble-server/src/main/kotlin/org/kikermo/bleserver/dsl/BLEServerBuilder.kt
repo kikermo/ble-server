@@ -47,9 +47,3 @@ class BLEServerBuilder {
 }
 
 fun bleServer(block: BLEServerBuilder.() -> Unit): BLEServer = BLEServerBuilder().apply(block).build()
-
-//class SERVICES : ArrayList<BLEService>() {
-//    fun service(block: BLEServiceBuilder.() -> Unit) {
-//        add(BLEServiceBuilder().apply(block).build())
-//    }
-//}

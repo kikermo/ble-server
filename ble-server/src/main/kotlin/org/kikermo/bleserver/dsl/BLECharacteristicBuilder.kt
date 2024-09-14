@@ -21,7 +21,3 @@ class BLECharacteristicBuilder {
         notifyAccess = notifyAccess
     )
 }
-
-//fun characteristic(
-//    block: BLECharacteristicBuilder.() -> Unit
-//): BLECharacteristic = BLECharacteristicBuilder().apply(block).build()

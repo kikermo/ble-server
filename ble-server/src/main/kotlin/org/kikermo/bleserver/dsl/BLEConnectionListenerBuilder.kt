@@ -16,7 +16,3 @@ class BLEConnectionListenerBuilder {
         }
     }
 }
-
-//fun bleConnectionListener(
-//    block: BLEConnectionListenerBuilder.() -> Unit
-//): BLEConnectionListener = BLEConnectionListenerBuilder().apply(block).build()
