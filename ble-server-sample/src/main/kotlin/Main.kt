@@ -45,7 +45,24 @@ fun main() {
     val service = bleService {
         uuid = UUID_SERVICE.toUUID()
         name = SERVICE_NAME
-        characteristics = listOf(writeCharacteristics, readCharacteristics)
+
+        characteristics {
+            characteristic {
+                uuid = UUID_READ_CHARACTERISTIC.toUUID()
+
+                readAccess = BLECharacteristic.AccessType.Read
+                notifyAccess = BLECharacteristic.AccessType.Notify
+                name = "heartbeat"
+            }
+            characteristic {
+                uuid = UUID_WRITE_CHARACTERISTIC.toUUID()
+                readAccess = BLECharacteristic.AccessType.Read
+                writeAccess = BLECharacteristic.AccessType.Write { value ->
+                    println("New value - $value")
+                }
+                name = "temperature"
+            }
+        }
     }
 
     val connectionListener = object : BLEConnectionListener {
