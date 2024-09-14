@@ -12,6 +12,8 @@ private const val SERVICE_NAME = "sampleservice"
 private const val SERVICE_NAME_SECONDARY = "samblesecondary"
 
 fun runSimpleServerDSL() {
+    println("DSL Sample")
+
     val server = bleServer {
         serverName = SERVER_NAME
         bleServerConnector = BluezBLEServerConnector()
