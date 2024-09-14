@@ -8,6 +8,9 @@ dependencies {
 //    implementation(libs.bleserver.bluez)
     implementation(project(":ble-server"))
     implementation(project(":ble-server-bluez"))
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+
 }
 
 repositories {

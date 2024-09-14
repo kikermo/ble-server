@@ -333,7 +333,7 @@ internal class BluezBLEConnector {
             DBusSigHandler<ObjectManager.InterfacesRemoved> { signal ->
                 println(signal.name)
                 println(signal.interfaces.joinToString(","))
-                signal.interfaces.filter { it == BLUEZ_DEVICE_INTERFACE }.forEach { ir ->
+                signal.interfaces.filter { it == BLUEZ_DEVICE_INTERFACE }.forEach { _ ->
                     listener?.onDeviceDisconnected()
                 }
             }
