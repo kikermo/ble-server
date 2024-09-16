@@ -1,21 +1,26 @@
 package org.kikermo.bleserver.bluez.internal
 
-import org.bluez.*
+import org.bluez.GattApplication1
+import org.bluez.GattCharacteristic1
+import org.bluez.GattManager1
+import org.bluez.GattService1
+import org.bluez.LEAdvertisement1
+import org.bluez.LEAdvertisingManager1
 import org.freedesktop.dbus.DBusPath
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder
-import org.freedesktop.dbus.interfaces.*
+import org.freedesktop.dbus.interfaces.DBus
+import org.freedesktop.dbus.interfaces.DBusInterface
+import org.freedesktop.dbus.interfaces.DBusSigHandler
+import org.freedesktop.dbus.interfaces.ObjectManager
+import org.freedesktop.dbus.interfaces.Properties
 import org.freedesktop.dbus.interfaces.Properties.PropertiesChanged
 import org.freedesktop.dbus.types.Variant
 import org.kikermo.bleserver.BLEConnectionListener
 import org.kikermo.bleserver.BLEService
-import org.kikermo.bleserver.internal.GATT_CHARACTERISTIC_INTERFACE
-import org.kikermo.bleserver.internal.toAdvertisementProperties
-import org.kikermo.bleserver.internal.toPath
-import org.kikermo.bleserver.internal.toProperties
+import org.kikermo.bleserver.bluez.exception.BLUEZException
 
 internal class BluezBLEConnector {
     companion object {
-
         private const val DBUS_BUSNAME = "org.freedesktop.DBus"
 
         private const val BLUEZ_DBUS_BUS_NAME = "org.bluez"
@@ -23,7 +28,6 @@ internal class BluezBLEConnector {
         private const val BLUEZ_LE_ADV_INTERFACE = "org.bluez.LEAdvertisingManager1"
         private const val BLUEZ_ADAPTER_INTERFACE = "org.bluez.Adapter1"
         private const val BLUEZ_DEVICE_INTERFACE = "org.bluez.Device1"
-
 
         private const val PATH_DBUS_DIVIDER = "/"
         private const val PATH_ADVERTISEMENT_SUFFIX = "/advertisement"
@@ -41,7 +45,7 @@ internal class BluezBLEConnector {
         adapterAlias: String? = null,
         serverName: String,
         primaryService: BLEService,
-        listener: BLEConnectionListener?
+        listener: BLEConnectionListener?,
     ) {
         val adapterPath = findAdapterPath()
 
@@ -53,21 +57,23 @@ internal class BluezBLEConnector {
             adapterProperties.Set(BLUEZ_ADAPTER_INTERFACE, "Alias", Variant(adapterAlias))
         }
 
-        val gattManager: GattManager1 = dbusConnector.getRemoteObject(
-            BLUEZ_DBUS_BUS_NAME,
-            adapterPath,
-            GattManager1::class.java
-        ) as GattManager1
-        val advManager: LEAdvertisingManager1 = dbusConnector.getRemoteObject(
-            BLUEZ_DBUS_BUS_NAME,
-            adapterPath,
-            LEAdvertisingManager1::class.java
-        ) as LEAdvertisingManager1
+        val gattManager: GattManager1 =
+            dbusConnector.getRemoteObject(
+                BLUEZ_DBUS_BUS_NAME,
+                adapterPath,
+                GattManager1::class.java,
+            ) as GattManager1
+        val advManager: LEAdvertisingManager1 =
+            dbusConnector.getRemoteObject(
+                BLUEZ_DBUS_BUS_NAME,
+                adapterPath,
+                LEAdvertisingManager1::class.java,
+            ) as LEAdvertisingManager1
 
         registerAdvertisement(
             bleServices = bleServices,
             serverName = serverName,
-            advertisementManager = advManager
+            advertisementManager = advManager,
         )
 
         registerGattService(
@@ -83,14 +89,15 @@ internal class BluezBLEConnector {
     private fun registerAdvertisement(
         bleServices: List<BLEService>,
         serverName: String,
-        advertisementManager: LEAdvertisingManager1
+        advertisementManager: LEAdvertisingManager1,
     ) {
-        val advertisementProperties = getAdvertisementProperties(
-            bleServices = bleServices,
-            serverName = serverName,
-        )
+        val advertisementProperties =
+            getAdvertisementProperties(
+                bleServices = bleServices,
+                serverName = serverName,
+            )
         dbusConnector.exportObject(
-            advertisementProperties
+            advertisementProperties,
         )
         advertisementManager.RegisterAdvertisement(advertisementProperties, mapOf())
     }
@@ -101,100 +108,110 @@ internal class BluezBLEConnector {
         applicationName: String,
         primaryService: BLEService,
     ) {
-        val managedObject = buildMap {
-            bleServices.forEach { bleService ->
-                val servicePath = bleService.toPath(applicationName)
-                val isPrimaryService = bleService == primaryService
-                put(
-                    key = servicePath,
-                    value = bleService.toProperties(
-                        isPrimary = isPrimaryService,
-                        serverName = applicationName
-                    )
-                )
-
-                bleService.characteristics.forEach { bleCharacteristic ->
+        val managedObject =
+            buildMap {
+                bleServices.forEach { bleService ->
+                    val servicePath = bleService.toPath(applicationName)
+                    val isPrimaryService = bleService == primaryService
                     put(
-                        key = DBusPath(bleCharacteristic.toPath(servicePath.path)),
-                        value = bleCharacteristic.toProperties(servicePath.path)
+                        key = servicePath,
+                        value =
+                            bleService.toProperties(
+                                isPrimary = isPrimaryService,
+                                serverName = applicationName,
+                            ),
                     )
+
+                    bleService.characteristics.forEach { bleCharacteristic ->
+                        put(
+                            key = DBusPath(bleCharacteristic.toPath(servicePath.path)),
+                            value = bleCharacteristic.toProperties(servicePath.path),
+                        )
+                    }
                 }
             }
-        }
 
-        val gattApplication = object : GattApplication1 {
-            override fun isRemote(): Boolean {
-                return false
+        val gattApplication =
+            object : GattApplication1 {
+                override fun isRemote(): Boolean = false
+
+                override fun getObjectPath(): String = "$PATH_DBUS_DIVIDER$applicationName"
+
+                override fun GetManagedObjects(): Map<DBusPath, Map<String, Map<String, Variant<*>>>> {
+                    println("Application -> GetManagedObjects")
+
+                    return managedObject
+                }
             }
-
-            override fun getObjectPath(): String {
-                return "$PATH_DBUS_DIVIDER$applicationName"
-            }
-
-            override fun GetManagedObjects(): Map<DBusPath, Map<String, Map<String, Variant<*>>>> {
-                println("Application -> GetManagedObjects")
-
-                return managedObject
-            }
-        }
         bleServices.forEach { bleService ->
             val gattService = gattService1(bleService = bleService, applicationName = applicationName)
             bleService.characteristics.forEach { bleCharacteristic ->
                 val characteristicProperties = bleCharacteristic.toProperties(gattService.objectPath)
-                val gattCharacteristic = object : GattCharacteristic1, Properties {
-                    override fun getObjectPath(): String {
-                        return bleCharacteristic.toPath(bleService.toPath(applicationName).path)
-                    }
+                val gattCharacteristic =
+                    object : GattCharacteristic1, Properties {
+                        override fun getObjectPath(): String = bleCharacteristic.toPath(bleService.toPath(applicationName).path)
 
-                    override fun <A : Any?> Get(p0: String?, p1: String?): A {
-                        return characteristicProperties[p0]?.get(p1)?.value as A?
-                            ?: throw RuntimeException("No characteristic")
-                    }
+                        override fun <A : Any?> Get(
+                            p0: String?,
+                            p1: String?,
+                        ): A =
+                            characteristicProperties[p0]?.get(p1)?.value as A?
+                                ?: throw BLUEZException("Missing characteristic")
 
-                    override fun <A : Any?> Set(p0: String?, p1: String?, p2: A) {
-                    }
-
-                    override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
-                        if (GATT_CHARACTERISTIC_INTERFACE == interfaceName) {
-                            return characteristicProperties[GATT_CHARACTERISTIC_INTERFACE]
-                                ?: throw RuntimeException("Interface [interface_name=$interfaceName]")
+                        override fun <A : Any?> Set(
+                            p0: String?,
+                            p1: String?,
+                            p2: A,
+                        ) {
+                            // No-OP
                         }
-                        throw RuntimeException("Interface [interface_name=$interfaceName]")
-                    }
 
-                    override fun ReadValue(option: MutableMap<String, Variant<Any>>?): ByteArray {
-                        return bleCharacteristic.value
-                    }
-
-                    override fun WriteValue(value: ByteArray?, option: MutableMap<String, Variant<Any>>?) {
-                        if (value == null) {
-                            return
+                        override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
+                            if (GATT_CHARACTERISTIC_INTERFACE == interfaceName) {
+                                return characteristicProperties[GATT_CHARACTERISTIC_INTERFACE]
+                                    ?: throw BLUEZException("Interface [interface_name=$interfaceName]")
+                            }
+                            throw BLUEZException("Interface [interface_name=$interfaceName]")
                         }
-                        bleCharacteristic.writeAccess?.let {
-                            it.onValueChangedListener(value)
+
+                        override fun ReadValue(option: MutableMap<String, Variant<Any>>?): ByteArray = bleCharacteristic.value
+
+                        override fun WriteValue(
+                            value: ByteArray?,
+                            option: MutableMap<String, Variant<Any>>?,
+                        ) {
+                            if (value == null) {
+                                return
+                            }
+                            bleCharacteristic.writeAccess?.let {
+                                it.onValueChangedListener(value)
+                            }
+                        }
+
+                        override fun StartNotify() {
+                            if (bleCharacteristic.notifyAccess == null) {
+                                return
+                            }
+                            bleCharacteristic.onValueChanged = { value ->
+                                val signal =
+                                    PropertiesChanged(
+                                        // _path =
+                                        objectPath,
+                                        // _interfaceName =
+                                        GATT_CHARACTERISTIC_INTERFACE,
+                                        // _propertiesChanged =
+                                        mapOf("Value" to Variant(value)),
+                                        // _propertiesRemoved =
+                                        listOf(),
+                                    )
+                                dbusConnector.sendMessage(signal)
+                            }
+                        }
+
+                        override fun StopNotify() {
+                            bleCharacteristic.onValueChanged = null
                         }
                     }
-
-                    override fun StartNotify() {
-                        if (bleCharacteristic.notifyAccess == null) {
-                            return
-                        }
-                        bleCharacteristic.onValueChanged = { value ->
-                            val signal = PropertiesChanged(
-                                /* _path = */ objectPath,
-                                /* _interfaceName = */ GATT_CHARACTERISTIC_INTERFACE,
-                                /* _propertiesChanged = */ mapOf("Value" to Variant(value)),
-                                /* _propertiesRemoved = */ listOf()
-                            )
-                            dbusConnector.sendMessage(signal)
-                        }
-                    }
-
-                    override fun StopNotify() {
-                        bleCharacteristic.onValueChanged = null
-                    }
-
-                }
                 dbusConnector.exportObject(gattCharacteristic)
             }
             dbusConnector.exportObject(gattService)
@@ -215,29 +232,37 @@ internal class BluezBLEConnector {
         gattManager.RegisterApplication(gattApplication, mutableMapOf())
     }
 
-    private fun gattService1(bleService: BLEService, applicationName: String): GattService1 {
+    private fun gattService1(
+        bleService: BLEService,
+        applicationName: String,
+    ): GattService1 {
         val servicePath = bleService.toPath(applicationName).path
         val serviceProperties = bleService.toProperties(true, applicationName)
 
         return object : GattService1, Properties {
-            override fun getObjectPath(): String {
-                return servicePath
-            }
+            override fun getObjectPath(): String = servicePath
 
-            override fun <A : Any?> Get(p0: String?, p1: String?): A {
-                return serviceProperties[p0]?.get(p1)?.value as A?
-                    ?: throw RuntimeException("Property not found on service")
-            }
+            override fun <A : Any?> Get(
+                p0: String?,
+                p1: String?,
+            ): A =
+                serviceProperties[p0]?.get(p1)?.value as A?
+                    ?: throw BLUEZException("Property not found on service")
 
-            override fun <A : Any?> Set(p0: String?, p1: String?, p2: A) {
+            override fun <A : Any?> Set(
+                p0: String?,
+                p1: String?,
+                p2: A,
+            ) {
+                // No-OP
             }
 
             override fun GetAll(interfaceName: String): Map<String, Variant<*>> {
                 if (GATT_SERVICE_INTERFACE == interfaceName) {
                     return serviceProperties[GATT_SERVICE_INTERFACE]
-                        ?: throw RuntimeException("No $GATT_SERVICE_INTERFACE found on service")
+                        ?: throw BLUEZException("No $GATT_SERVICE_INTERFACE found on service")
                 }
-                throw RuntimeException("Interface $interfaceName doesn't match $GATT_SERVICE_INTERFACE")
+                throw BLUEZException("Interface $interfaceName doesn't match $GATT_SERVICE_INTERFACE")
             }
         }
     }
@@ -251,61 +276,73 @@ internal class BluezBLEConnector {
         dbusConnector.unExportObject(path)
     }
 
-    private fun getAdvertisementProperties(bleServices: List<BLEService>, serverName: String): DBusInterface {
-        return object : Properties, LEAdvertisement1 {
+    private fun getAdvertisementProperties(
+        bleServices: List<BLEService>,
+        serverName: String,
+    ): DBusInterface =
+        object : Properties, LEAdvertisement1 {
             val properties = toAdvertisementProperties(bleServices = bleServices, serverName = serverName)
 
-            override fun getObjectPath(): String {
-                return "$PATH_DBUS_DIVIDER$serverName$PATH_ADVERTISEMENT_SUFFIX"
-            }
+            override fun getObjectPath(): String = "$PATH_DBUS_DIVIDER$serverName$PATH_ADVERTISEMENT_SUFFIX"
 
             override fun Release() {
                 println("Release LE Server")
             }
 
-            override fun <A : Any?> Get(interfaceName: String, propertyName: String): A {
-                return (properties[interfaceName]?.get(propertyName) as? A)
-                    ?: throw RuntimeException("Incompatible types")
-            }
+            override fun <A : Any?> Get(
+                interfaceName: String,
+                propertyName: String,
+            ): A =
+                (properties[interfaceName]?.get(propertyName) as? A)
+                    ?: throw BLUEZException("Incompatible types")
 
-            override fun <A : Any?> Set(interfaceName: String, propertyName: String, propertyValue: A) {
+            override fun <A : Any?> Set(
+                interfaceName: String,
+                propertyName: String,
+                propertyValue: A,
+            ) {
                 if (propertyValue is Variant<*>) {
                     properties[interfaceName]?.put(propertyName, propertyValue)
                 }
             }
 
-            override fun GetAll(interfaceName: String): MutableMap<String, Variant<*>> {
-                return properties[interfaceName]
-                    ?: throw RuntimeException("Wrong interface [interface_name=$interfaceName]")
-            }
+            override fun GetAll(interfaceName: String): MutableMap<String, Variant<*>> =
+                properties[interfaceName]
+                    ?: throw BLUEZException("Wrong interface [interface_name=$interfaceName]")
         }
-    }
 
     private fun findAdapterPath(): String {
         val bluezObjectManager =
             dbusConnector.getRemoteObject(
                 BLUEZ_DBUS_BUS_NAME,
                 PATH_DBUS_DIVIDER,
-                ObjectManager::class.java
+                ObjectManager::class.java,
             ) as ObjectManager
 
-        return bluezObjectManager.GetManagedObjects().entries.find { entry ->
-            entry.value.containsKey(BLUEZ_LE_ADV_INTERFACE)
-                    && entry.value.containsKey(BLUEZ_GATT_INTERFACE)
-
-        }?.key?.path ?: throw RuntimeException("No BLE adapter found")
+        return bluezObjectManager
+            .GetManagedObjects()
+            .entries
+            .find { entry ->
+                entry.value.containsKey(BLUEZ_LE_ADV_INTERFACE) &&
+                    entry.value.containsKey(BLUEZ_GATT_INTERFACE)
+            }?.key
+            ?.path ?: throw BLUEZException("No BLE adapter found")
     }
 
     private fun initInterfacesHandler(listener: BLEConnectionListener?) {
-        val dbus: DBus = dbusConnector.getRemoteObject(
-            DBUS_BUSNAME, "/or/freedesktop/DBus",
-            DBus::class.java
-        )
+        val dbus: DBus =
+            dbusConnector.getRemoteObject(
+                DBUS_BUSNAME,
+                "/or/freedesktop/DBus",
+                DBus::class.java,
+            )
         val bluezDbusBusName: String = dbus.GetNameOwner(BLUEZ_DBUS_BUS_NAME)
-        val bluezObjectManager = dbusConnector.getRemoteObject(
-            BLUEZ_DBUS_BUS_NAME, "/",
-            ObjectManager::class.java
-        )
+        val bluezObjectManager =
+            dbusConnector.getRemoteObject(
+                BLUEZ_DBUS_BUS_NAME,
+                "/",
+                ObjectManager::class.java,
+            )
 
         interfacesAddedSignalHandler =
             DBusSigHandler<ObjectManager.InterfacesAdded> { signal ->
@@ -316,7 +353,7 @@ internal class BluezBLEConnector {
 
                     listener?.onDeviceConnected(
                         deviceAddress = address.value,
-                        deviceName = alias.value
+                        deviceName = alias.value,
                     )
                 }
             }
@@ -325,7 +362,7 @@ internal class BluezBLEConnector {
             DBusSigHandler<ObjectManager.InterfacesRemoved> { signal ->
                 println(signal.name)
                 println(signal.interfaces.joinToString(","))
-                signal.interfaces.filter { it == BLUEZ_DEVICE_INTERFACE }.forEach { ir ->
+                signal.interfaces.filter { it == BLUEZ_DEVICE_INTERFACE }.forEach { _ ->
                     listener?.onDeviceDisconnected()
                 }
             }
@@ -334,13 +371,13 @@ internal class BluezBLEConnector {
             ObjectManager.InterfacesAdded::class.java,
             bluezDbusBusName,
             bluezObjectManager,
-            interfacesAddedSignalHandler
+            interfacesAddedSignalHandler,
         )
         dbusConnector.addSigHandler(
             ObjectManager.InterfacesRemoved::class.java,
             bluezDbusBusName,
             bluezObjectManager,
-            interfacesRemovedSignalHandler
+            interfacesRemovedSignalHandler,
         )
     }
 }

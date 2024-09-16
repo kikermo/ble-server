@@ -35,7 +35,6 @@ object PubilsInfo {
     const val snapshot = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 }
 
-
 publishing {
     publications {
 
@@ -43,7 +42,7 @@ publishing {
             groupId = PubilsInfo.groupId
             artifactId = PubilsInfo.artifactId
 //            version = project.version.toString()
-            version = "0.0.1"
+            version = "0.0.1-SNAPSHOT"
 
             from(components["java"])
 
@@ -61,19 +60,19 @@ publishing {
                     developer {
                         id.set("kikermo")
                         name.set("Enrique Ramirez")
-                        //organization.set("")
-                        //organizationUrl.set("https://kikermo.org/")
+                        // organization.set("")
+                        // organizationUrl.set("https://kikermo.org/")
                     }
                 }
                 scm {
                     url.set(
-                        "https://github.com/${PubilsInfo.githubRepo}.git"
+                        "https://github.com/${PubilsInfo.githubRepo}.git",
                     )
                     connection.set(
-                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git"
+                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git",
                     )
                     developerConnection.set(
-                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git"
+                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git",
                     )
                 }
                 issueManagement {

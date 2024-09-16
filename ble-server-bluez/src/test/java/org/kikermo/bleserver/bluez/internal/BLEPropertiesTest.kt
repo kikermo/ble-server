@@ -5,8 +5,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.kikermo.bleserver.BLECharacteristic
 import org.kikermo.bleserver.BLEService
-import org.kikermo.bleserver.internal.toProperties
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -18,16 +17,15 @@ class BLEPropertiesTest {
     private val serviceUUID = UUID.randomUUID()
     private val serviceName = "sampleService"
 
-    private val serverName = "sampleServer"
-
     @Test
     @DisplayName("map characteristic")
     fun mapCharacteristic() {
         // given
-        val bleCharacteristic = BLECharacteristic(
-            uuid = characteristicUUID,
-            name = characteristicName,
-        )
+        val bleCharacteristic =
+            BLECharacteristic(
+                uuid = characteristicUUID,
+                name = characteristicName,
+            )
 
         // when
         val result = bleCharacteristic.toProperties(servicePath)
@@ -44,10 +42,11 @@ class BLEPropertiesTest {
     @DisplayName("map no characteristic flags")
     fun mapCharacteristicNoFlags() {
         // given
-        val bleCharacteristic = BLECharacteristic(
-            uuid = characteristicUUID,
-            name = characteristicName,
-        )
+        val bleCharacteristic =
+            BLECharacteristic(
+                uuid = characteristicUUID,
+                name = characteristicName,
+            )
 
         // when
         val result = bleCharacteristic.toProperties(servicePath)
@@ -61,13 +60,14 @@ class BLEPropertiesTest {
     @DisplayName("map characteristic flags")
     fun mapAllCharacteristicFlags() {
         // given
-        val bleCharacteristic = BLECharacteristic(
-            uuid = characteristicUUID,
-            name = characteristicName,
-            readAccess = BLECharacteristic.AccessType.Read,
-            writeAccess = BLECharacteristic.AccessType.Write {},
-            notifyAccess = BLECharacteristic.AccessType.Notify
-        )
+        val bleCharacteristic =
+            BLECharacteristic(
+                uuid = characteristicUUID,
+                name = characteristicName,
+                readAccess = BLECharacteristic.AccessType.Read,
+                writeAccess = BLECharacteristic.AccessType.Write {},
+                notifyAccess = BLECharacteristic.AccessType.Notify,
+            )
 
         // when
         val result = bleCharacteristic.toProperties(servicePath)
@@ -83,11 +83,12 @@ class BLEPropertiesTest {
     @DisplayName("map service")
     fun mapService() {
         // given
-        val bleService = BLEService(
-            uuid = serviceUUID,
-            name = serviceName,
-            characteristics = listOf()
-        )
+        val bleService =
+            BLEService(
+                uuid = serviceUUID,
+                name = serviceName,
+                characteristics = listOf(),
+            )
 
         // when
         val result = bleService.toProperties(true, serviceName)
@@ -95,7 +96,7 @@ class BLEPropertiesTest {
         // then
         assertNotNull(result["org.bluez.GattService1"])
         assertEquals(serviceUUID.toString(), result["org.bluez.GattService1"]?.get("UUID")?.value)
-        assertEquals(true,result["org.bluez.GattService1"]?.get("Primary")?.value)
+        assertEquals(true, result["org.bluez.GattService1"]?.get("Primary")?.value)
         assertNotNull(result["org.bluez.GattService1"]?.get("Characteristics"))
     }
 }

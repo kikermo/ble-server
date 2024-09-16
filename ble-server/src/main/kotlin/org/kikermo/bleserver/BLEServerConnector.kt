@@ -6,7 +6,7 @@ interface BLEServerConnector {
         adapterAlias: String? = null,
         serverName: String,
         primaryService: BLEService,
-        listener: BLEConnectionListener?
+        listener: BLEConnectionListener?,
     )
 
     fun stopServices(serverName: String)
