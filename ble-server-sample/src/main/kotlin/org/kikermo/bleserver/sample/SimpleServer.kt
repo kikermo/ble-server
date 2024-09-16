@@ -19,58 +19,68 @@ private const val SERVICE_NAME_SECONDARY = "samblesecondary"
 fun runSimpleServer() {
     println("Classic Sample")
 
-    val readCharacteristics = BLECharacteristic(
-        uuid = UUID_READ_CHARACTERISTIC.toUUID(),
-        readAccess = BLECharacteristic.AccessType.Read,
-        notifyAccess = BLECharacteristic.AccessType.Notify,
-        name = "heartbeat",
-    )
+    val readCharacteristics =
+        BLECharacteristic(
+            uuid = UUID_READ_CHARACTERISTIC.toUUID(),
+            readAccess = BLECharacteristic.AccessType.Read,
+            notifyAccess = BLECharacteristic.AccessType.Notify,
+            name = "heartbeat",
+        )
     readCharacteristics.value = byteArrayOf(1, 2, 3)
 
-    val writeCharacteristics = BLECharacteristic(
-        uuid = UUID_WRITE_CHARACTERISTIC.toUUID(),
-        readAccess = BLECharacteristic.AccessType.Read,
-        writeAccess = BLECharacteristic.AccessType.Write { value ->
-            println("New value - $value")
-        },
-        name = "temperature"
-    )
+    val writeCharacteristics =
+        BLECharacteristic(
+            uuid = UUID_WRITE_CHARACTERISTIC.toUUID(),
+            readAccess = BLECharacteristic.AccessType.Read,
+            writeAccess =
+                BLECharacteristic.AccessType.Write { value ->
+                    println("New value - $value")
+                },
+            name = "temperature",
+        )
 
-    val readOnlyCharacteristic = BLECharacteristic(
-        name = "moisture",
-        uuid = UUID_READ_ONLY_CHARACTERISTIC.toUUID(),
-        readAccess = BLECharacteristic.AccessType.Read
-    )
+    val readOnlyCharacteristic =
+        BLECharacteristic(
+            name = "moisture",
+            uuid = UUID_READ_ONLY_CHARACTERISTIC.toUUID(),
+            readAccess = BLECharacteristic.AccessType.Read,
+        )
 
-    val primaryService = BLEService(
-        uuid = UUID_PRIMARY_SERVICE.toUUID(),
-        name = SERVICE_NAME,
-        characteristics = listOf(writeCharacteristics, readCharacteristics)
-    )
+    val primaryService =
+        BLEService(
+            uuid = UUID_PRIMARY_SERVICE.toUUID(),
+            name = SERVICE_NAME,
+            characteristics = listOf(writeCharacteristics, readCharacteristics),
+        )
 
-    val secondaryService = BLEService(
-        uuid = UUID_SECONDARY_SERVICE.toUUID(),
-        name = SERVICE_NAME_SECONDARY,
-        characteristics = listOf(readOnlyCharacteristic)
-    )
+    val secondaryService =
+        BLEService(
+            uuid = UUID_SECONDARY_SERVICE.toUUID(),
+            name = SERVICE_NAME_SECONDARY,
+            characteristics = listOf(readOnlyCharacteristic),
+        )
 
-    val connectionListener = object : BLEConnectionListener {
-        override fun onDeviceConnected(deviceName: String, deviceAddress: String) {
-            println("device connected $deviceName, $deviceAddress")
+    val connectionListener =
+        object : BLEConnectionListener {
+            override fun onDeviceConnected(
+                deviceName: String,
+                deviceAddress: String,
+            ) {
+                println("device connected $deviceName, $deviceAddress")
+            }
+
+            override fun onDeviceDisconnected() {
+                println("device disconnected")
+            }
         }
 
-        override fun onDeviceDisconnected() {
-            println("device disconnected")
-        }
-
-    }
-
-    val server = BLEServer(
-        services = listOf(primaryService),
-        serverName = SERVER_NAME,
-        connectionListener = connectionListener,
-        bleServerConnector = BluezBLEServerConnector()
-    )
+    val server =
+        BLEServer(
+            services = listOf(primaryService),
+            serverName = SERVER_NAME,
+            connectionListener = connectionListener,
+            bleServerConnector = BluezBLEServerConnector(),
+        )
     server.primaryService = primaryService
 
     server.start()
@@ -83,7 +93,6 @@ fun runSimpleServer() {
             readCharacteristics.value = Random.nextBytes(2)
             readCharacteristics.value = Random.nextBytes(2)
         } catch (e: InterruptedException) {
-
             println("Service was interrupted.")
             server.stop()
         }

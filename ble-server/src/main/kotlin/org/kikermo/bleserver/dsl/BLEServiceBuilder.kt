@@ -12,12 +12,13 @@ class BLEServiceBuilder {
     private var characteristics: MutableList<BLECharacteristic> = mutableListOf()
 
     fun characteristic(block: BLECharacteristicBuilder.() -> Unit) {
-       characteristics.add(BLECharacteristicBuilder().apply(block).build())
+        characteristics.add(BLECharacteristicBuilder().apply(block).build())
     }
 
-    fun build(): BLEService = BLEService(
-        uuid = uuid ?: throw BLEBuilderException(childComponent = "uuid", component = "BLEService"),
-        name = name ?: throw BLEBuilderException(childComponent = "name", component = "BLEService"),
-        characteristics = characteristics
-    )
+    fun build(): BLEService =
+        BLEService(
+            uuid = uuid ?: throw BLEBuilderException(childComponent = "uuid", component = "BLEService"),
+            name = name ?: throw BLEBuilderException(childComponent = "name", component = "BLEService"),
+            characteristics = characteristics,
+        )
 }

@@ -18,7 +18,11 @@ class BLECharacteristic(
 
     sealed class AccessType {
         data object Read : AccessType()
+
         data object Notify : AccessType()
-        data class Write(val onValueChangedListener: (ByteArray) -> Unit) : AccessType()
+
+        data class Write(
+            val onValueChangedListener: (ByteArray) -> Unit,
+        ) : AccessType()
     }
 }

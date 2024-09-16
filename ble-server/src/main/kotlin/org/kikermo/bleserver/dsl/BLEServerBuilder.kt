@@ -31,28 +31,29 @@ class BLEServerBuilder {
         this.connectionListener = BLEConnectionListenerBuilder().apply(block).build()
     }
 
-    fun build(): BLEServer = BLEServer(
-        serverName = this.serverName ?: throw BLEBuilderException(
-            childComponent = "serviceName",
-            component = "BLEServer"
-        ),
-        bleServerConnector = this.bleServerConnector ?: throw BLEBuilderException(
-            childComponent = "bleServerConnector",
-            component = "BLEServer"
-        ),
-        connectionListener = this.connectionListener,
-        services = services.toList()
-    ).apply {
-        this@BLEServerBuilder.primaryService?.let { builderPrimaryService ->
-            primaryService = builderPrimaryService
-        }
+    fun build(): BLEServer =
+        BLEServer(
+            serverName =
+                this.serverName ?: throw BLEBuilderException(
+                    childComponent = "serviceName",
+                    component = "BLEServer",
+                ),
+            bleServerConnector =
+                this.bleServerConnector ?: throw BLEBuilderException(
+                    childComponent = "bleServerConnector",
+                    component = "BLEServer",
+                ),
+            connectionListener = this.connectionListener,
+            services = services.toList(),
+        ).apply {
+            this@BLEServerBuilder.primaryService?.let { builderPrimaryService ->
+                primaryService = builderPrimaryService
+            }
 
-        if (autoStart) {
-            start()
+            if (autoStart) {
+                start()
+            }
         }
-    }
-
 }
 
 fun bleServer(block: BLEServerBuilder.() -> Unit): BLEServer = BLEServerBuilder().apply(block).build()
-

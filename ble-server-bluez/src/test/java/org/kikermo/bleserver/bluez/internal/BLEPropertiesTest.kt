@@ -21,10 +21,11 @@ class BLEPropertiesTest {
     @DisplayName("map characteristic")
     fun mapCharacteristic() {
         // given
-        val bleCharacteristic = BLECharacteristic(
-            uuid = characteristicUUID,
-            name = characteristicName,
-        )
+        val bleCharacteristic =
+            BLECharacteristic(
+                uuid = characteristicUUID,
+                name = characteristicName,
+            )
 
         // when
         val result = bleCharacteristic.toProperties(servicePath)
@@ -41,10 +42,11 @@ class BLEPropertiesTest {
     @DisplayName("map no characteristic flags")
     fun mapCharacteristicNoFlags() {
         // given
-        val bleCharacteristic = BLECharacteristic(
-            uuid = characteristicUUID,
-            name = characteristicName,
-        )
+        val bleCharacteristic =
+            BLECharacteristic(
+                uuid = characteristicUUID,
+                name = characteristicName,
+            )
 
         // when
         val result = bleCharacteristic.toProperties(servicePath)
@@ -58,13 +60,14 @@ class BLEPropertiesTest {
     @DisplayName("map characteristic flags")
     fun mapAllCharacteristicFlags() {
         // given
-        val bleCharacteristic = BLECharacteristic(
-            uuid = characteristicUUID,
-            name = characteristicName,
-            readAccess = BLECharacteristic.AccessType.Read,
-            writeAccess = BLECharacteristic.AccessType.Write {},
-            notifyAccess = BLECharacteristic.AccessType.Notify
-        )
+        val bleCharacteristic =
+            BLECharacteristic(
+                uuid = characteristicUUID,
+                name = characteristicName,
+                readAccess = BLECharacteristic.AccessType.Read,
+                writeAccess = BLECharacteristic.AccessType.Write {},
+                notifyAccess = BLECharacteristic.AccessType.Notify,
+            )
 
         // when
         val result = bleCharacteristic.toProperties(servicePath)
@@ -80,11 +83,12 @@ class BLEPropertiesTest {
     @DisplayName("map service")
     fun mapService() {
         // given
-        val bleService = BLEService(
-            uuid = serviceUUID,
-            name = serviceName,
-            characteristics = listOf()
-        )
+        val bleService =
+            BLEService(
+                uuid = serviceUUID,
+                name = serviceName,
+                characteristics = listOf(),
+            )
 
         // when
         val result = bleService.toProperties(true, serviceName)
