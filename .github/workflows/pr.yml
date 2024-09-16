@@ -31,4 +31,4 @@ jobs:
 
       - name: run Ktlint
         run: |
-          ktlint --reporter=checkstyle,output=build/ktlint-report.xml
+          ktlint --baseline=ktlint-baseline.xml

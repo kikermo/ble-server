@@ -9,12 +9,12 @@ class BLEServer(
     private val connectionListener: BLEConnectionListener? = null,
     private val bleServerConnector: BLEServerConnector,
 ) {
-    private var _selectedPrimaryService: BLEService? = null
+    private var selectedPrimaryService: BLEService? = null
 
     var primaryService: BLEService
-        get() = _selectedPrimaryService ?: services.firstOrNull() ?: throw BLENoServicesException()
+        get() = selectedPrimaryService ?: services.firstOrNull() ?: throw BLENoServicesException()
         set(value) {
-            _selectedPrimaryService = value
+            selectedPrimaryService = value
         }
 
     fun start() {
