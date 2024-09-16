@@ -6,6 +6,7 @@ import org.kikermo.bleserver.exception.BLEBuilderException
 import java.util.UUID
 import kotlin.concurrent.thread
 
+@BleDsl
 class BLECharacteristicBuilder {
     private var valueChangingAction: (((ByteArray) -> Unit) -> Unit)? = null
 

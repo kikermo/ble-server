@@ -6,6 +6,7 @@ import org.kikermo.bleserver.BLEServerConnector
 import org.kikermo.bleserver.BLEService
 import org.kikermo.bleserver.exception.BLEBuilderException
 
+@BleDsl
 class BLEServerBuilder {
     var serverName: String? = null
     var bleServerConnector: BLEServerConnector? = null
@@ -46,10 +47,12 @@ class BLEServerBuilder {
             primaryService = builderPrimaryService
         }
 
-        if(autoStart) {
+        if (autoStart) {
             start()
         }
     }
+
 }
 
 fun bleServer(block: BLEServerBuilder.() -> Unit): BLEServer = BLEServerBuilder().apply(block).build()
+

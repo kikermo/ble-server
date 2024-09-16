@@ -5,6 +5,7 @@ import org.kikermo.bleserver.BLEService
 import org.kikermo.bleserver.exception.BLEBuilderException
 import java.util.UUID
 
+@BleDsl
 class BLEServiceBuilder {
     var uuid: UUID? = null
     var name: String? = null
@@ -20,5 +21,3 @@ class BLEServiceBuilder {
         characteristics = characteristics
     )
 }
-
-fun bleService(block: BLEServiceBuilder.() -> Unit): BLEService = BLEServiceBuilder().apply(block).build()
