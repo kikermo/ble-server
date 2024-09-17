@@ -25,23 +25,18 @@ java {
 }
 
 object PubilsInfo {
-    const val groupId = "org.kikermo.bleserver"
     const val artifactId = "core"
 
     const val desc = "BleServer core API"
     const val license = "Apache-2.0"
     const val githubRepo = "kikermo/ble-server"
-    const val release = "https://s01.oss.sonatype.org/service/local/"
-    const val snapshot = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 }
 
 publishing {
     publications {
 
         create<MavenPublication>("maven") {
-            groupId = PubilsInfo.groupId
             artifactId = PubilsInfo.artifactId
-            version = (properties["version"] as String?) ?: "0.0.1-SNAPSHOT"
 
             from(components["java"])
 
