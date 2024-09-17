@@ -48,7 +48,7 @@ You can also define the ble server in a more idiomatic way using the kotlin DSL.
 ```kotlin
  bleServer {
     serverName = SERVER_NAME
-    bleServerConnector = BluezBLEServerConnector()
+    bluezServerConnector()
 
     primaryService {
         uuid = UUID.fromString(UUID_PRIMARY_SERVICE)
