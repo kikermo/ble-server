@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.time.delay
 import org.kikermo.bleserver.BLECharacteristic
-import org.kikermo.bleserver.bluez.BluezBLEServerConnector
+import org.kikermo.bleserver.bluez.dsl.bluezServerConnector
 import org.kikermo.bleserver.dsl.bleServer
 import java.time.Duration
 import kotlin.random.Random
@@ -33,7 +33,7 @@ fun runSimpleServerDSL() {
     val server =
         bleServer {
             serverName = SERVER_NAME
-            bleServerConnector = BluezBLEServerConnector()
+            bluezServerConnector()
 
             connectionListener {
                 onDeviceConnected = { deviceName, deviceAddress ->
