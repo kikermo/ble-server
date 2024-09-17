@@ -55,8 +55,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = PubilsInfo.groupId
             artifactId = PubilsInfo.artifactId
-//            version = project.version.toString()
-            version = "0.0.1-SNAPSHOT"
+            version = (properties["version"] as String?) ?: "0.0.1-SNAPSHOT"
 
             from(components["java"])
 
