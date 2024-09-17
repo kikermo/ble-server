@@ -4,8 +4,12 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.bleserver.core)
-    implementation(libs.bleserver.bluez)
+//    implementation(libs.bleserver.core)
+//    implementation(libs.bleserver.bluez)
+    implementation(project(":ble-server"))
+    implementation(project(":ble-server-bluez"))
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 }
 
 repositories {
@@ -27,7 +31,7 @@ tasks.jar {
             mapOf(
                 "Implementation-Title" to project.name,
                 "Implementation-Version" to project.version,
-                "Main-Class" to "org.kikermo.bleserver.MainKt"
+                "Main-Class" to "org.kikermo.bleserver.MainKt",
             ),
         )
     }

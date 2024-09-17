@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<baseline version="1.0">
+    <file name="ble-server-bluez/build.gradle.kts">
+        <error line="42" column="15" source="standard:property-naming" />
+        <error line="44" column="15" source="standard:property-naming" />
+        <error line="45" column="15" source="standard:property-naming" />
+        <error line="46" column="15" source="standard:property-naming" />
+    </file>
+    <file name="ble-server/build.gradle.kts">
+        <error line="28" column="15" source="standard:property-naming" />
+        <error line="30" column="15" source="standard:property-naming" />
+        <error line="31" column="15" source="standard:property-naming" />
+        <error line="32" column="15" source="standard:property-naming" />
+    </file>
+</baseline>

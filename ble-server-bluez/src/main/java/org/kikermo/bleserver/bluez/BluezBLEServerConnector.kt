@@ -13,7 +13,7 @@ class BluezBLEServerConnector : BLEServerConnector {
         adapterAlias: String?,
         serverName: String,
         primaryService: BLEService,
-        listener: BLEConnectionListener?
+        listener: BLEConnectionListener?,
     ) {
         connector.startServices(
             bleServices = bleServices,

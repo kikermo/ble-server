@@ -25,25 +25,18 @@ java {
 }
 
 object PubilsInfo {
-    const val groupId = "org.kikermo.bleserver"
     const val artifactId = "core"
 
     const val desc = "BleServer core API"
     const val license = "Apache-2.0"
     const val githubRepo = "kikermo/ble-server"
-    const val release = "https://s01.oss.sonatype.org/service/local/"
-    const val snapshot = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
 }
-
 
 publishing {
     publications {
 
         create<MavenPublication>("maven") {
-            groupId = PubilsInfo.groupId
             artifactId = PubilsInfo.artifactId
-//            version = project.version.toString()
-            version = "0.0.1"
 
             from(components["java"])
 
@@ -61,19 +54,19 @@ publishing {
                     developer {
                         id.set("kikermo")
                         name.set("Enrique Ramirez")
-                        //organization.set("")
-                        //organizationUrl.set("https://kikermo.org/")
+                        // organization.set("")
+                        // organizationUrl.set("https://kikermo.org/")
                     }
                 }
                 scm {
                     url.set(
-                        "https://github.com/${PubilsInfo.githubRepo}.git"
+                        "https://github.com/${PubilsInfo.githubRepo}.git",
                     )
                     connection.set(
-                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git"
+                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git",
                     )
                     developerConnection.set(
-                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git"
+                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git",
                     )
                 }
                 issueManagement {

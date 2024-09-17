@@ -1,4 +1,5 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Maven Central Version](https://img.shields.io/maven-central/v/org.kikermo.bleserver/core)
 
 # ble-server
 BLE server-side library for the BLUEZ stack built in Kotlin. Initial implementation based on  [ble-java](https://github.com/tongo/ble-java).
@@ -42,6 +43,34 @@ val service = BLEService(
     server.start()
 ```
 
+### Kotlin DSL (Experimental)
+You can also define the ble server in a more idiomatic way using the kotlin DSL.
+```kotlin
+ bleServer {
+    serverName = SERVER_NAME
+    bluezServerConnector()
+
+    primaryService {
+        uuid = UUID.fromString(UUID_PRIMARY_SERVICE)
+        name = SERVICE_NAME
+
+        characteristic {
+            uuid = UUID.fromString(UUID_READ_CHARACTERISTIC)
+            name = "mycharacteristic"
+
+            readAccess = BLECharacteristic.AccessType.Read
+            notifyAccess = BLECharacteristic.AccessType.Notify
+            initialValue = Random.nextBytes(2)
+        }
+
+    }
+}
+
+```
+
+When using the dsl, the service auto starts unless you specify the opposite `autostart=false`.
+
+
 ### Contribution
 
 At this stage, contributions can be made in any of the following ways:
@@ -57,9 +86,9 @@ At this stage, contributions can be made in any of the following ways:
 As mentioned before, the project is in an early stage, but these are the features I would like to implement in the following months.
 
 - [x] Local maven publishing. August 2024.
-- [ ] Quality checks Q3 2024
-- [ ] DSL creation. Q3 2024
-- [ ] Beta version on Manven Centra. Q4 2024
+- [x] Quality checks Q3 2024
+- [x] DSL creation. Q3 2024
+- [x] Beta version on Maven Central. Q4 2024
 - [ ] KMP support Q1,Q2 2025
 
 
