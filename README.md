@@ -10,8 +10,8 @@ This project is currently in a very early stage. I built it as a proof of concep
 
 1. Add dependencies to your project
 ```gradle
-implementation("org.kikermo.bleserver:core:0.0.1")
-implementation("org.kikermo.bleserver:bluez:0.0.1")
+implementation("org.kikermo.bleserver:core:0.0.2")
+implementation("org.kikermo.bleserver:bluez:0.0.2")
 ```
 
 2. Define characteristic
