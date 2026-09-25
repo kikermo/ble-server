@@ -21,28 +21,28 @@ java {
 }
 
 object PubilsInfo {
-    const val artifactId = "core"
+    const val ARTIFACT_ID = "core"
 
-    const val desc = "BleServer core API"
-    const val license = "Apache-2.0"
-    const val githubRepo = "kikermo/ble-server"
+    const val DESC = "BleServer core API"
+    const val LICENSE = "Apache-2.0"
+    const val GITHUB_REPO = "kikermo/ble-server"
 }
 
 publishing {
     publications {
 
         create<MavenPublication>("maven") {
-            artifactId = PubilsInfo.artifactId
+            artifactId = PubilsInfo.ARTIFACT_ID
 
             from(components["java"])
 
             pom {
                 name.set(project.name)
-                description.set(PubilsInfo.desc)
-                url.set("https://github.com/${PubilsInfo.githubRepo}")
+                description.set(PubilsInfo.DESC)
+                url.set("https://github.com/${PubilsInfo.GITHUB_REPO}")
                 licenses {
                     license {
-                        name.set(PubilsInfo.license)
+                        name.set(PubilsInfo.LICENSE)
                         url.set("https://opensource.org/licenses/Apache-2.0")
                     }
                 }
@@ -56,17 +56,17 @@ publishing {
                 }
                 scm {
                     url.set(
-                        "https://github.com/${PubilsInfo.githubRepo}.git",
+                        "https://github.com/${PubilsInfo.GITHUB_REPO}.git",
                     )
                     connection.set(
-                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git",
+                        "scm:git:git://github.com/${PubilsInfo.GITHUB_REPO}.git",
                     )
                     developerConnection.set(
-                        "scm:git:git://github.com/${PubilsInfo.githubRepo}.git",
+                        "scm:git:git://github.com/${PubilsInfo.GITHUB_REPO}.git",
                     )
                 }
                 issueManagement {
-                    url.set("https://github.com/${PubilsInfo.githubRepo}/issues")
+                    url.set("https://github.com/${PubilsInfo.GITHUB_REPO}/issues")
                 }
             }
         }
